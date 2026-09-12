@@ -22,6 +22,9 @@ public class AppDbContext : DbContext
     public DbSet<SensorReading> SensorReadings => Set<SensorReading>();
     public DbSet<MqttBrokerConfig> MqttBrokerConfigs => Set<MqttBrokerConfig>();
     public DbSet<MqttSensorTopicConfig> MqttSensorTopicConfigs => Set<MqttSensorTopicConfig>();
+    public DbSet<PowerDevice> PowerDevices => Set<PowerDevice>();
+    public DbSet<PowerLatestTelemetry> PowerLatestTelemetry => Set<PowerLatestTelemetry>();
+    public DbSet<PowerTelemetryHistory> PowerTelemetryHistory => Set<PowerTelemetryHistory>();
     public DbSet<AlertRule> AlertRules => Set<AlertRule>();
     public DbSet<AlertEvent> AlertEvents => Set<AlertEvent>();
     public DbSet<ServerSyncStatus> ServerSyncStatuses => Set<ServerSyncStatus>();
@@ -73,6 +76,30 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.SensorTypeId).HasDatabaseName("ix_mqtt_sensor_topics_sensor_type_id");
             entity.HasOne<SensorType>().WithMany().HasForeignKey(x => x.SensorTypeId).OnDelete(DeleteBehavior.SetNull);
         });
+
+        modelBuilder.Entity<PowerDevice>(entity =>
+        {
+            entity.ToTable("power_devices");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.DeviceCode).HasColumnName("device_code").HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasColumnName("name").HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Model).HasColumnName("model").HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Location).HasColumnName("location").HasMaxLength(150);
+            entity.Property(x => x.GatewayId).HasColumnName("gateway_id").HasMaxLength(80);
+            entity.Property(x => x.MqttTopic).HasColumnName("mqtt_topic").HasMaxLength(255).IsRequired();
+            entity.Property(x => x.Status).HasColumnName("status").HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Enabled).HasColumnName("enabled");
+            entity.Property(x => x.LastSeen).HasColumnName("last_seen");
+            entity.Property(x => x.CreatedAt).HasColumnName("created_at");
+            entity.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            entity.HasIndex(x => x.DeviceCode).IsUnique().HasDatabaseName("uq_power_devices_device_code");
+            entity.HasIndex(x => x.Status).HasDatabaseName("ix_power_devices_status");
+            entity.HasOne(x => x.LatestTelemetry).WithOne().HasForeignKey<PowerLatestTelemetry>(x => x.DeviceId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        ConfigurePowerTelemetry(modelBuilder.Entity<PowerLatestTelemetry>(), "power_latest_telemetry");
+        ConfigurePowerTelemetry(modelBuilder.Entity<PowerTelemetryHistory>(), "power_telemetry_history", uniqueDevice: false);
 
         modelBuilder.Entity<AppUser>(entity =>
         {
@@ -363,10 +390,51 @@ public class AppDbContext : DbContext
             entity.Property(x => x.BackupDbLocation).HasColumnName("backup_db_location").HasMaxLength(500);
             entity.Property(x => x.BackupSchedule).HasColumnName("backup_schedule").HasMaxLength(20).IsRequired();
             entity.Property(x => x.PlcIpAddress).HasColumnName("plc_ip_address").HasMaxLength(80);
+            entity.Property(x => x.ElectricityRatePerKwh).HasColumnName("electricity_rate_per_kwh").HasPrecision(18, 2);
             entity.Property(x => x.CreatedAt).HasColumnName("created_at");
             entity.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             entity.HasOne(x => x.PressureUnit).WithMany().HasForeignKey(x => x.PressureUnitId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.CycleTimeUnit).WithMany().HasForeignKey(x => x.CycleTimeUnitId).OnDelete(DeleteBehavior.Restrict);
         });
+    }
+
+    private static void ConfigurePowerTelemetry<T>(
+        Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<T> entity,
+        string table,
+        bool uniqueDevice = true) where T : class
+    {
+        entity.ToTable(table);
+        entity.HasKey("Id");
+        entity.Property<long>("Id").HasColumnName("id");
+        entity.Property<long>("DeviceId").HasColumnName("device_id");
+        entity.Property<DateTime>("Timestamp").HasColumnName("timestamp");
+        entity.Property<decimal?>("VoltageL1n").HasColumnName("voltage_l1n").HasPrecision(18, 6);
+        entity.Property<decimal?>("VoltageL2n").HasColumnName("voltage_l2n").HasPrecision(18, 6);
+        entity.Property<decimal?>("VoltageL3n").HasColumnName("voltage_l3n").HasPrecision(18, 6);
+        entity.Property<decimal?>("VoltageL1l2").HasColumnName("voltage_l1l2").HasPrecision(18, 6);
+        entity.Property<decimal?>("VoltageL2l3").HasColumnName("voltage_l2l3").HasPrecision(18, 6);
+        entity.Property<decimal?>("VoltageL3l1").HasColumnName("voltage_l3l1").HasPrecision(18, 6);
+        entity.Property<decimal?>("CurrentL1").HasColumnName("current_l1").HasPrecision(18, 6);
+        entity.Property<decimal?>("CurrentL2").HasColumnName("current_l2").HasPrecision(18, 6);
+        entity.Property<decimal?>("CurrentL3").HasColumnName("current_l3").HasPrecision(18, 6);
+        entity.Property<decimal?>("CurrentNeutral").HasColumnName("current_neutral").HasPrecision(18, 6);
+        entity.Property<decimal?>("ActivePowerKw").HasColumnName("active_power_kw").HasPrecision(18, 6);
+        entity.Property<decimal?>("ReactivePowerKvar").HasColumnName("reactive_power_kvar").HasPrecision(18, 6);
+        entity.Property<decimal?>("ApparentPowerKva").HasColumnName("apparent_power_kva").HasPrecision(18, 6);
+        entity.Property<decimal?>("PowerFactor").HasColumnName("power_factor").HasPrecision(12, 6);
+        entity.Property<decimal?>("FrequencyHz").HasColumnName("frequency_hz").HasPrecision(12, 6);
+        entity.Property<decimal?>("EnergyImportKwh").HasColumnName("energy_import_kwh").HasPrecision(20, 6);
+        entity.Property<decimal?>("EnergyExportKwh").HasColumnName("energy_export_kwh").HasPrecision(20, 6);
+        entity.Property<DateTime>("ReceivedAt").HasColumnName("received_at");
+        entity.Property<DateTime>("UpdatedAt").HasColumnName("updated_at");
+        entity.HasIndex("DeviceId")
+            .IsUnique(uniqueDevice)
+            .HasDatabaseName(uniqueDevice ? "uq_power_latest_device_id" : $"ix_{table}_device_id");
+        entity.HasIndex("Timestamp").HasDatabaseName($"ix_{table}_timestamp");
+        entity.HasIndex("DeviceId", "Timestamp").HasDatabaseName($"ix_{table}_device_timestamp");
+        if (!uniqueDevice)
+        {
+            entity.HasOne<PowerDevice>().WithMany().HasForeignKey("DeviceId").OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

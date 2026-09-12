@@ -1,9 +1,7 @@
 import React from "react";
 import {
-  BoxCubeIcon,
   BoltIcon,
   GridIcon,
-  TaskIcon,
 } from "../icons/index";
 
 const SettingsIcon = () => (
@@ -54,22 +52,17 @@ export const navItems: NavItem[] = [
   },
   {
     icon: <BoltIcon />,
-    name: "Mqtt Configuration",
-    path: "/mqtt-configuration",
+    name: "Power Monitoring",
+    path: "/",
   },
   {
-    icon: <BoxCubeIcon />,
-    name: "Location",
-    path: "/location",
-  },
-  {
-    icon: <TaskIcon />,
-    name: "Log Buffer",
-    path: "/log-buffer",
+    icon: <BoltIcon />,
+    name: "Devices",
+    path: "/devices",
   },
   {
     icon: <SettingsIcon />,
-    name: "Setting",
+    name: "Settings",
     path: "/settings",
   },
 ];

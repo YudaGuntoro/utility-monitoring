@@ -1,23 +1,23 @@
-# SHMS-System
+# Utility Monitoring
 
-Structural Health Monitoring System for **PT. Baja Titian Utama**.
+Power Monitoring phase for Utility Monitoring. The app consumes normalized MQTT telemetry from a gateway, stores latest and historical readings in MySQL, and renders a dynamic dashboard for registered power meters.
 
-## Included modules
+## Architecture
 
-- JWT login with the existing authentication flow
-- SHMS dashboard
-- MQTT configuration
-- Location monitoring
-- Sensor log buffer
-- System settings
-- MySQL schema and starter data
+```text
+PM8000 -> Gateway -> MQTT Broker -> Worker MQTT Subscriber -> MySQL -> API -> Frontend
+```
 
-## Project structure
+The gateway owns Modbus polling and PM8000 register mapping. Utility Monitoring only consumes the MQTT contract documented in `docs/MQTT_GATEWAY_INTEGRATION.md`.
 
-- `Frontend` - JavaScript/Next.js frontend application
-- `Backend` - C#/.NET API, domain/persistence projects, database script, and backend assets
+## Requirements
 
-## Default demo access
+- MySQL 8
+- .NET 8 SDK
+- Node.js/npm
+- MQTT broker on port `1883`
+
+Default demo login remains:
 
 ```text
 Username: root
@@ -26,24 +26,32 @@ Password: root_native
 
 ## Database
 
-MySQL 8 is required. From the repository root, run:
+Use database `utility-system`. From the repository root, run:
 
 ```powershell
 mysql -u root -p -e "source Backend/database/bajatitian-shms.sql"
 ```
 
-The script creates `bajatitian_shms`, the login user, SHMS tables, and starter records.
+The script creates the auth tables, power tables, and seeds `PM-01` through `PM-05`. The API and worker also create the power tables and seed devices at startup if missing.
 
-## Run locally
+## Run Locally
 
 API:
 
 ```powershell
-$env:ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=3306;User ID=root;Password=YOUR_PASSWORD;Database=bajatitian-shms;SslMode=None;AllowPublicKeyRetrieval=True;"
+$env:ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=3306;User ID=root;Password=YOUR_PASSWORD;Database=utility-system;SslMode=None;AllowPublicKeyRetrieval=True;"
 dotnet run --project Backend\Web.API\Web.API.csproj
 ```
 
-Frontend, in another terminal:
+Worker:
+
+```powershell
+$env:MQTT_HOST="127.0.0.1"
+$env:MQTT_TOPIC="utility/power/+/telemetry"
+dotnet run --project Backend\Worker\Worker.csproj
+```
+
+Frontend:
 
 ```powershell
 Set-Location Frontend
@@ -54,12 +62,35 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## MQTT Simulator
+
+```powershell
+$env:MQTT_HOST="127.0.0.1"
+dotnet run --project Backend\PowerMqttSimulator\PowerMqttSimulator.csproj
+```
+
+The simulator publishes `PM-01` through `PM-05` to `utility/power/{deviceCode}/telemetry`.
+
 ## Core API
 
-Core endpoints:
-
 - `POST /api/auth/login`
-- `GET /api/shms-system/status`
-- `GET|PUT /api/shms-system/mqtt-configuration`
-- `GET /api/shms-system/log-buffer`
-- `GET|PUT /api/shms-system/settings`
+- `GET /api/power/dashboard`
+- `GET|POST /api/power/devices`
+- `GET|PUT|DELETE /api/power/devices/{id}`
+- `GET /api/power/devices/{id}/history?start=...&end=...`
+- `GET /api/shms-system/mqtt-broker/status`
+
+## Add PM-06
+
+Open `Devices`, add:
+
+```text
+Device Code: PM-06
+Name: Main Panel 06
+Model: Schneider PM8240
+Location: Electrical Room
+Gateway ID: GW-01
+MQTT Topic: utility/power/PM-06/telemetry
+```
+
+The dashboard will show PM-06 as offline until valid MQTT telemetry arrives.

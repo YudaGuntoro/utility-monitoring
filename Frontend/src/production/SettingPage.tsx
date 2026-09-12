@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, ReactNode, useEffect, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { ConfirmModal } from "@/components/ui/modal/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
 import { CheckLineIcon, PaperPlaneIcon } from "@/icons";
@@ -181,30 +182,11 @@ export default function SettingPage() {
   return (
     <>
       <div className="space-y-7">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">System</p>
-          <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">Setting</h1>
-        </div>
+        <PageBreadcrumb pageTitle="Setting" />
 
         <form className="mx-4 space-y-6" onSubmit={submit}>
-          <SettingSection eyebrow="Display" title="Unit Display">
-            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-5">
-              <label className={labelClass}>
-                TILT Unit
-                <input className={inputClass} onChange={(event) => patchSettings({ tiltUnit: event.target.value })} placeholder="deg" value={settings.tiltUnit} />
-              </label>
-              <label className={labelClass}>
-                VW Unit
-                <input className={inputClass} onChange={(event) => patchSettings({ vwUnit: event.target.value })} placeholder="Hz" value={settings.vwUnit} />
-              </label>
-              <label className={labelClass}>
-                ATRH Unit
-                <input className={inputClass} onChange={(event) => patchSettings({ atrhUnit: event.target.value })} placeholder="C / %RH" value={settings.atrhUnit} />
-              </label>
-              <label className={labelClass}>
-                ACC Unit
-                <input className={inputClass} onChange={(event) => patchSettings({ accUnit: event.target.value })} placeholder="g" value={settings.accUnit} />
-              </label>
+          <SettingSection eyebrow="General" title="System Preferences">
+            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
               <label className={labelClass}>
                 Timezone
                 <select className={inputClass} onChange={(event) => patchSettings({ timezone: event.target.value as TimezoneOption })} value={settings.timezone}>
@@ -212,6 +194,16 @@ export default function SettingPage() {
                   <option value="Asia/Bangkok">Asia/Bangkok</option>
                   <option value="UTC">UTC</option>
                 </select>
+              </label>
+              <label className={labelClass}>
+                Device Offline Timeout
+                <input
+                  className={inputClass}
+                  min={10}
+                  onChange={(event) => patchSettings({ sensorOfflineSeconds: numericValue(event.target.value, settings.sensorOfflineSeconds) })}
+                  type="number"
+                  value={settings.sensorOfflineSeconds}
+                />
               </label>
             </div>
           </SettingSection>
@@ -249,75 +241,26 @@ export default function SettingPage() {
             </div>
           </SettingSection>
 
-          <SettingSection eyebrow="Upload" title="Upload Configuration">
-            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-5">
-              <ToggleField checked={settings.uploadEnabled} label="Auto Upload" onChange={(checked) => patchSettings({ uploadEnabled: checked })} />
+          <SettingSection eyebrow="Billing" title="Electricity Cost">
+            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
               <label className={labelClass}>
-                Upload Interval
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ uploadIntervalSeconds: numericValue(event.target.value, settings.uploadIntervalSeconds) })}
-                  type="number"
-                  value={settings.uploadIntervalSeconds}
-                />
-              </label>
-              <label className={labelClass}>
-                Batch Size
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ uploadBatchSize: numericValue(event.target.value, settings.uploadBatchSize) })}
-                  type="number"
-                  value={settings.uploadBatchSize}
-                />
-              </label>
-              <label className={labelClass}>
-                Timeout
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ uploadTimeoutSeconds: numericValue(event.target.value, settings.uploadTimeoutSeconds) })}
-                  type="number"
-                  value={settings.uploadTimeoutSeconds}
-                />
-              </label>
-              <label className={labelClass}>
-                Max Retry
+                Harga per kWh
                 <input
                   className={inputClass}
                   min={0}
-                  onChange={(event) => patchSettings({ maxRetry: numericValue(event.target.value, settings.maxRetry) })}
+                  onChange={(event) => patchSettings({ electricityRatePerKwh: numericValue(event.target.value, settings.electricityRatePerKwh) })}
+                  placeholder="0"
+                  step="0.01"
                   type="number"
-                  value={settings.maxRetry}
-                />
-              </label>
-              <label className={labelClass}>
-                Retry Delay
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ retryDelaySeconds: numericValue(event.target.value, settings.retryDelaySeconds) })}
-                  type="number"
-                  value={settings.retryDelaySeconds}
+                  value={settings.electricityRatePerKwh}
                 />
               </label>
             </div>
           </SettingSection>
 
           <SettingSection eyebrow="Storage" title="Buffer & Storage">
-            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-3">
               <ToggleField checked={settings.autoCleanupEnabled} label="Auto Cleanup" onChange={(checked) => patchSettings({ autoCleanupEnabled: checked })} />
-              <label className={labelClass}>
-                Max Buffer Records
-                <input
-                  className={inputClass}
-                  min={100}
-                  onChange={(event) => patchSettings({ maxBufferRecords: numericValue(event.target.value, settings.maxBufferRecords) })}
-                  type="number"
-                  value={settings.maxBufferRecords}
-                />
-              </label>
               <label className={labelClass}>
                 Log Retention
                 <input
@@ -333,53 +276,8 @@ export default function SettingPage() {
                 <input
                   className={inputClass}
                   onChange={(event) => patchSettings({ backupDbLocation: event.target.value })}
-                  placeholder="D:\\Backup\\SHMS-System"
+                  placeholder="D:\\Backup\\Utility-Monitoring"
                   value={settings.backupDbLocation}
-                />
-              </label>
-            </div>
-          </SettingSection>
-
-          <SettingSection eyebrow="Alert" title="Alert Threshold">
-            <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
-              <label className={labelClass}>
-                Sensor Offline
-                <input
-                  className={inputClass}
-                  min={10}
-                  onChange={(event) => patchSettings({ sensorOfflineSeconds: numericValue(event.target.value, settings.sensorOfflineSeconds) })}
-                  type="number"
-                  value={settings.sensorOfflineSeconds}
-                />
-              </label>
-              <label className={labelClass}>
-                Buffer Warning
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ bufferWarningLimit: numericValue(event.target.value, settings.bufferWarningLimit) })}
-                  type="number"
-                  value={settings.bufferWarningLimit}
-                />
-              </label>
-              <label className={labelClass}>
-                Upload Failed Warning
-                <input
-                  className={inputClass}
-                  min={1}
-                  onChange={(event) => patchSettings({ uploadFailedWarningLimit: numericValue(event.target.value, settings.uploadFailedWarningLimit) })}
-                  type="number"
-                  value={settings.uploadFailedWarningLimit}
-                />
-              </label>
-              <label className={labelClass}>
-                Endpoint Down
-                <input
-                  className={inputClass}
-                  min={10}
-                  onChange={(event) => patchSettings({ endpointDownWarningSeconds: numericValue(event.target.value, settings.endpointDownWarningSeconds) })}
-                  type="number"
-                  value={settings.endpointDownWarningSeconds}
                 />
               </label>
             </div>

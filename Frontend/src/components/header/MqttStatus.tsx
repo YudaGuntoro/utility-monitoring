@@ -6,7 +6,6 @@ import {
   API_ACTIVITY_EVENT,
   type ApiActivityEventDetail,
 } from "@/lib/api-activity";
-import { readSystemSettings } from "@/production/settings";
 
 type SHMSStatus = {
   last_mqtt_at?: string | null;
@@ -44,16 +43,9 @@ function formatTime(value?: string | null) {
   return date ? timeFormatter.format(date) : "--:--:--";
 }
 
-function isRecentSensorUpdate(value: string | null | undefined, thresholdMs: number) {
-  const date = parseDate(value);
-  return date ? Date.now() - date.getTime() <= thresholdMs : false;
-}
-
 export default function MqttStatus() {
   const [lastApiAt, setLastApiAt] = useState<string | null>(null);
   const [lastMqttAt, setLastMqttAt] = useState<string | null>(null);
-  const [witonServerOnline, setWitonServerOnline] = useState(false);
-  const [sensorsOnline, setSensorsOnline] = useState(false);
   const [mqttBrokerOnline, setMqttBrokerOnline] = useState(false);
 
   useEffect(() => {
@@ -73,16 +65,11 @@ export default function MqttStatus() {
       try {
         const status = await apiGet<SHMSStatus>("/api/shms-system/status");
         if (!ignore) {
-          const thresholdMs = Math.max(1, readSystemSettings().sensorOfflineSeconds) * 1000;
-          setWitonServerOnline(true);
           setLastMqttAt(status.last_mqtt_at ?? null);
-          setSensorsOnline(isRecentSensorUpdate(status.last_mqtt_at, thresholdMs));
         }
       } catch {
         if (!ignore) {
-          setWitonServerOnline(false);
           setLastMqttAt((current) => current);
-          setSensorsOnline(false);
         }
       }
     };
@@ -123,17 +110,9 @@ export default function MqttStatus() {
 
   return (
     <div className="flex h-11 max-w-full items-center gap-3 overflow-hidden rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-500 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 sm:px-4">
-      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${witonServerOnline ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
-        <span className={`size-2 rounded-full ${witonServerOnline ? "bg-emerald-500" : "bg-rose-500"}`} />
-        Witon Server {witonServerOnline ? "Online" : "Offline"}
-      </span>
       <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${mqttBrokerOnline ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
         <span className={`size-2 rounded-full ${mqttBrokerOnline ? "bg-emerald-500" : "bg-rose-500"}`} />
         Broker {mqttBrokerOnline ? "Online" : "Offline"}
-      </span>
-      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${sensorsOnline ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
-        <span className={`size-2 rounded-full ${sensorsOnline ? "bg-emerald-500" : "bg-rose-500"}`} />
-        Sensor {sensorsOnline ? "Online" : "Offline"}
       </span>
       <span className="h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-800" />
       <span className="truncate">

@@ -27,10 +27,10 @@ export default function SHMSBrand({
       {showTitle ? (
         <div className="min-w-0">
           <p className={`font-extrabold leading-tight ${inverted ? "text-white" : "text-brand-600"} ${titleSize}`}>
-            Structural Health Monitoring System
+            Utility Monitoring
           </p>
           <p className={`font-medium ${inverted ? "text-white/75" : "text-slate-500"} ${subtitleSize}`}>
-            PT. Baja Titian Utama
+            Power Monitoring System
           </p>
         </div>
       ) : null}

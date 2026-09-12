@@ -16,6 +16,7 @@ export type SystemSettings = UnitSettings & {
   backupDbLocation: string;
   bufferWarningLimit: number;
   endpointDownWarningSeconds: number;
+  electricityRatePerKwh: number;
   logRetentionDays: number;
   mainApiEndpoint: string;
   mainApiToken: string;
@@ -45,6 +46,7 @@ export const defaultSystemSettings: SystemSettings = {
   bufferWarningLimit: 1000,
   cycleTimeUnit: "s",
   endpointDownWarningSeconds: 300,
+  electricityRatePerKwh: 0,
   logRetentionDays: 30,
   mainApiEndpoint: "",
   mainApiToken: "",
@@ -70,6 +72,7 @@ type ApiSystemSettings = {
   cycle_time_unit: string;
   backup_db_location: string;
   backup_schedule: BackupSchedule;
+  electricity_rate_per_kwh?: number | null;
   plc_ip_address?: string | null;
 };
 
@@ -78,6 +81,7 @@ function fromApiSettings(settings: ApiSystemSettings, fallback: SystemSettings =
     ...fallback,
     backupDbLocation: settings.backup_db_location ?? "",
     cycleTimeUnit: settings.cycle_time_unit ?? fallback.cycleTimeUnit,
+    electricityRatePerKwh: Number(settings.electricity_rate_per_kwh ?? fallback.electricityRatePerKwh),
     plcIpAddress: settings.plc_ip_address ?? "",
     pressureUnit: settings.pressure_unit ?? fallback.pressureUnit,
     schedule: settings.backup_schedule ?? fallback.schedule,
@@ -89,6 +93,7 @@ function toApiSettings(settings: SystemSettings) {
     backup_db_location: settings.backupDbLocation,
     backup_schedule: settings.schedule,
     cycle_time_unit: settings.cycleTimeUnit,
+    electricity_rate_per_kwh: settings.electricityRatePerKwh,
     plc_ip_address: settings.plcIpAddress,
     pressure_unit: settings.pressureUnit,
   };

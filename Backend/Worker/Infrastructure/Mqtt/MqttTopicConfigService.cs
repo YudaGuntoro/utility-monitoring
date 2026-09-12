@@ -40,6 +40,10 @@ public sealed class MqttTopicConfigService
 						{
 							topics.Add(new MqttSubscriptionTopic(reader.GetString(0).Trim(), Math.Clamp(reader.GetInt32(1), 0, 2)));
 						}
+						if (!topics.Any(x => string.Equals(x.Topic, "utility/power/+/telemetry", StringComparison.OrdinalIgnoreCase)))
+						{
+							topics.Add(new MqttSubscriptionTopic("utility/power/+/telemetry", 1));
+						}
 						readOnlyList = (from x in topics.GroupBy<MqttSubscriptionTopic, string>((MqttSubscriptionTopic x) => x.Topic, StringComparer.OrdinalIgnoreCase)
 							select x.First()).ToList();
 					}
@@ -59,7 +63,7 @@ public sealed class MqttTopicConfigService
 	private static async Task EnsureMqttSensorTopicsTableAsync(MySqlConnection connection, CancellationToken cancellationToken)
 	{
 		await using MySqlCommand command = connection.CreateCommand();
-		command.CommandText = "\nCREATE TABLE IF NOT EXISTS mqtt_sensor_topics (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    code VARCHAR(20) NOT NULL,\n    name VARCHAR(100) NOT NULL,\n    topic VARCHAR(255) NOT NULL,\n    qos INT NOT NULL DEFAULT 1,\n    enabled TINYINT(1) NOT NULL DEFAULT 1,\n    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY uq_mqtt_sensor_topics_code (code),\n    INDEX ix_mqtt_sensor_topics_enabled (enabled)\n);\n\nINSERT INTO mqtt_sensor_topics\n    (code, name, topic, qos, enabled)\nVALUES\n    ('TILT', 'Tilt Sensor', 'shms/tilt', 1, 1),\n    ('VW', 'Vibrating Wire Sensor', 'shms/vw', 1, 1),\n    ('ATRH', 'Air Temperature & RH Sensor', 'shms/atrh', 1, 1),\n    ('ACC', 'Accelerometer Sensor', 'shms/acc', 1, 1)\nON DUPLICATE KEY UPDATE\n    name = COALESCE(NULLIF(name, ''), VALUES(name)),\n    topic = COALESCE(NULLIF(topic, ''), VALUES(topic)),\n    qos = IF(qos BETWEEN 0 AND 2, qos, VALUES(qos)),\n    updated_at = CURRENT_TIMESTAMP;";
+	command.CommandText = "\nCREATE TABLE IF NOT EXISTS mqtt_sensor_topics (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    code VARCHAR(20) NOT NULL,\n    name VARCHAR(100) NOT NULL,\n    topic VARCHAR(255) NOT NULL,\n    qos INT NOT NULL DEFAULT 1,\n    enabled TINYINT(1) NOT NULL DEFAULT 1,\n    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY uq_mqtt_sensor_topics_code (code),\n    INDEX ix_mqtt_sensor_topics_enabled (enabled)\n);\n\nINSERT INTO mqtt_sensor_topics\n    (code, name, topic, qos, enabled)\nVALUES\n    ('POWER', 'Power Monitoring Telemetry', 'utility/power/+/telemetry', 1, 1)\nON DUPLICATE KEY UPDATE\n    name = VALUES(name),\n    topic = VALUES(topic),\n    qos = VALUES(qos),\n    enabled = 1,\n    updated_at = CURRENT_TIMESTAMP;";
 		await command.ExecuteNonQueryAsync(cancellationToken);
 	}
 }

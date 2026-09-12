@@ -59,6 +59,7 @@ public class SHMSSystemController : ApiControllerBase
             settings.BackupDbLocation = request.BackupDbLocation;
             settings.BackupSchedule = string.IsNullOrWhiteSpace(request.BackupSchedule) ? "daily" : request.BackupSchedule.Trim();
             settings.PlcIpAddress = request.PlcIpAddress;
+            settings.ElectricityRatePerKwh = Math.Max(0, request.ElectricityRatePerKwh);
             settings.UpdatedAt = DateTime.Now;
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -195,7 +196,8 @@ public class SHMSSystemController : ApiControllerBase
             CycleTimeUnit = settings?.CycleTimeUnit?.UnitSymbol ?? "s",
             BackupDbLocation = settings?.BackupDbLocation ?? string.Empty,
             BackupSchedule = settings?.BackupSchedule ?? "daily",
-            PlcIpAddress = settings?.PlcIpAddress ?? string.Empty
+            PlcIpAddress = settings?.PlcIpAddress ?? string.Empty,
+            ElectricityRatePerKwh = settings?.ElectricityRatePerKwh ?? 0
         };
     }
 
@@ -239,6 +241,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
     backup_db_location VARCHAR(500) NULL,
     backup_schedule VARCHAR(20) NOT NULL DEFAULT 'daily',
     plc_ip_address VARCHAR(80) NULL,
+    electricity_rate_per_kwh DECIMAL(18,2) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_system_settings_pressure_unit
@@ -270,6 +273,23 @@ WHERE pressure.unit_category = 'pressure'
   AND cycle_time.unit_symbol = 's'
 ON DUPLICATE KEY UPDATE
     id = system_settings.id;", cancellationToken);
+
+        await _db.Database.ExecuteSqlRawAsync(@"
+SET @electricity_rate_column_exists := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'system_settings'
+      AND COLUMN_NAME = 'electricity_rate_per_kwh'
+);
+SET @add_electricity_rate_sql := IF(
+    @electricity_rate_column_exists = 0,
+    'ALTER TABLE system_settings ADD COLUMN electricity_rate_per_kwh DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER plc_ip_address',
+    'SELECT 1'
+);
+PREPARE add_electricity_rate_statement FROM @add_electricity_rate_sql;
+EXECUTE add_electricity_rate_statement;
+DEALLOCATE PREPARE add_electricity_rate_statement;", cancellationToken);
     }
 
     private async Task<MeasurementUnit> EnsureMeasurementUnitAsync(

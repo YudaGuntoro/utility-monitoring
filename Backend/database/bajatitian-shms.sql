@@ -1,10 +1,10 @@
--- SHMS-System database bootstrap with normalized starter data.
+-- Utility Monitoring database bootstrap with normalized starter data.
 -- Run from repository root:
 -- mysql -u root -p -e "source Backend/database/bajatitian-shms.sql"
 
 SOURCE Backend/database/bajatitian-shms_schema_only.sql;
 
-USE `bajatitian_shms`;
+USE `utility-system`;
 
 SET @has_mqtt_sensor_type_id := (
     SELECT COUNT(*)
@@ -79,12 +79,13 @@ ON DUPLICATE KEY UPDATE
     updated_at = CURRENT_TIMESTAMP(6);
 
 INSERT INTO system_settings
-    (id, pressure_unit_id, cycle_time_unit_id, backup_schedule)
+    (id, pressure_unit_id, cycle_time_unit_id, backup_schedule, electricity_rate_per_kwh)
 SELECT
     1,
     pressure.id,
     cycle_time.id,
-    'daily'
+    'daily',
+    0
 FROM measurement_units pressure
 CROSS JOIN measurement_units cycle_time
 WHERE pressure.unit_category = 'pressure'
@@ -290,3 +291,5 @@ VALUES
     (1, 'Witon Server', NULL, 0, 0, 0)
 ON DUPLICATE KEY UPDATE
     server_name = VALUES(server_name);
+
+SOURCE Backend/Web.API.Persistence/Migrations/20260912_001_power_monitoring.sql;

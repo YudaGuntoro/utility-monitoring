@@ -911,7 +911,7 @@ span.flatpickr-weekday,
   }
 }
 
-/* SHMS-System global contrast and table header polish */
+/* Utility Monitoring global contrast and table header polish */
 :where(table thead, table thead tr, table thead th, table thead td) {
   background-color: #267fee !important;
   color: #ffffff !important;

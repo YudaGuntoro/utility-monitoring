@@ -46,6 +46,9 @@ public class SystemSetting
     [JsonPropertyName("plc_ip_address")]
     public string? PlcIpAddress { get; set; }
 
+    [JsonPropertyName("electricity_rate_per_kwh")]
+    public decimal ElectricityRatePerKwh { get; set; }
+
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
@@ -75,6 +78,9 @@ public class SystemSettingsResponse
 
     [JsonPropertyName("plc_ip_address")]
     public string PlcIpAddress { get; set; } = string.Empty;
+
+    [JsonPropertyName("electricity_rate_per_kwh")]
+    public decimal ElectricityRatePerKwh { get; set; }
 }
 
 public class UpdateSystemSettingsRequest
@@ -93,6 +99,9 @@ public class UpdateSystemSettingsRequest
 
     [JsonPropertyName("plc_ip_address")]
     public string? PlcIpAddress { get; set; }
+
+    [JsonPropertyName("electricity_rate_per_kwh")]
+    public decimal ElectricityRatePerKwh { get; set; }
 }
 
 public class MqttSensorTopicConfig

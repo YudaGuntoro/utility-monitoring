@@ -18,6 +18,7 @@ builder.Logging.AddProvider(new FileLoggerProvider(logDirectory));
 builder.Services.AddSingleton<MqttTopicConfigService>();
 builder.Services.AddSingleton<ILogWriterService, LogWriterService>();
 builder.Services.AddSingleton<ISensorReadingWriterService, SensorReadingWriterService>();
+builder.Services.AddSingleton<IPowerTelemetryWriterService, PowerTelemetryWriterService>();
 builder.Services.AddSingleton<ISyncStatusWriterService, SyncStatusWriterService>();
 builder.Services.AddSingleton<IMainServerUploader, MainServerUploader>();
 builder.Services.AddSingleton<IShmsSensorHandler, ShmsSensorHandler>();

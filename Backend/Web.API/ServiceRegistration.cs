@@ -36,7 +36,7 @@ public static class ServiceRegistration
 
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "SHMS-System Monitoring API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Utility Monitoring API", Version = "v1" });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header. Example: Bearer {token}",
@@ -115,7 +115,7 @@ public static class ServiceRegistration
 
         var connectionString = ReadSettingsIniValue("Database", "ConnectionString")
             ?? configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=127.0.0.1;Port=3306;User ID=root;Password=root_native;Database=bajatitian_shms;SslMode=None;AllowPublicKeyRetrieval=True;";
+            ?? "Server=127.0.0.1;Port=3306;User ID=root;Password=root_native;Database=utility-system;SslMode=None;AllowPublicKeyRetrieval=True;";
         services.AddDbContext<AppDbContext>(options =>
         {
             options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 34)));
@@ -201,7 +201,7 @@ public static class ServiceRegistration
         if (swaggerEnabled)
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SHMS-System Monitoring API v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Utility Monitoring API v1"));
         }
 
         app.UseCors();

@@ -14,6 +14,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
     private readonly IMainServerUploader _mainServerUploader;
     private readonly ILogWriterService _logWriterService;
     private readonly IShmsSensorHandler _sensorHandler;
+    private readonly IPowerTelemetryWriterService _powerTelemetryWriter;
     private readonly IRedisMqttMessageBuffer _redisBuffer;
     private readonly ISyncStatusWriterService _syncStatusWriter;
     private readonly int _maxReprocessBatch;
@@ -25,6 +26,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         IMainServerUploader mainServerUploader,
         ILogWriterService logWriterService,
         IShmsSensorHandler sensorHandler,
+        IPowerTelemetryWriterService powerTelemetryWriter,
         IRedisMqttMessageBuffer redisBuffer,
         ISyncStatusWriterService syncStatusWriter)
     {
@@ -32,6 +34,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         _mainServerUploader = mainServerUploader;
         _logWriterService = logWriterService;
         _sensorHandler = sensorHandler;
+        _powerTelemetryWriter = powerTelemetryWriter;
         _redisBuffer = redisBuffer;
         _syncStatusWriter = syncStatusWriter;
         _maxReprocessBatch = Math.Max(1, Config.Instance.ReadInt("MaxReprocessBatch", "Buffer", 100));
@@ -47,10 +50,17 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         }
 
         await _logWriterService.WaitUntilReadyAsync(cancellationToken);
+        await _powerTelemetryWriter.WaitUntilReadyAsync(cancellationToken);
     }
 
     public async Task HandleAsync(string topic, string payload, CancellationToken cancellationToken = default)
     {
+        if (await _powerTelemetryWriter.UpsertAsync(topic, payload, cancellationToken))
+        {
+            await _logWriterService.WriteRawAsync(topic, payload, "uploaded", cancellationToken: cancellationToken);
+            return;
+        }
+
         var uploadResult = await _mainServerUploader.UploadAsync(topic, payload, cancellationToken);
         if (uploadResult.Success)
         {

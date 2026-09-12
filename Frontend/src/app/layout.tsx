@@ -7,10 +7,10 @@ import { ToastProvider } from '@/context/ToastContext';
 
 export const metadata: Metadata = {
   title: {
-    default: "STRUCTURAL HEALTH MONITORING SYSTEM",
-    template: "%s | STRUCTURAL HEALTH MONITORING SYSTEM",
+    default: "Utility Monitoring",
+    template: "%s | Utility Monitoring",
   },
-  description: "STRUCTURAL HEALTH MONITORING SYSTEM for PT. Baja Titian Utama",
+  description: "Utility Monitoring power monitoring system",
   icons: {
     apple: "/shms-icon.svg?v=btu-shms-2",
     icon: "/shms-icon.svg?v=btu-shms-2",

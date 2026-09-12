@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { ConfirmModal } from "@/components/ui/modal/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
 import { CheckLineIcon, CloseLineIcon } from "@/icons";
@@ -123,10 +124,7 @@ export default function MqttConfigurationPage() {
   return (
     <>
       <div className="space-y-7">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">MQTT</p>
-          <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">MQTT Configuration</h1>
-        </div>
+        <PageBreadcrumb pageTitle="MQTT Configuration" />
 
         <form
           className="mx-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"

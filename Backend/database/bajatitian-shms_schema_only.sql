@@ -1,11 +1,11 @@
--- SHMS-System normalized schema.
+-- Utility Monitoring normalized schema.
 -- Target: MySQL 8.0+
 
-CREATE DATABASE IF NOT EXISTS `bajatitian_shms`
+CREATE DATABASE IF NOT EXISTS `utility-system`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE `bajatitian_shms`;
+USE `utility-system`;
 
 CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
     backup_db_location VARCHAR(500) NULL,
     backup_schedule VARCHAR(20) NOT NULL DEFAULT 'daily',
     plc_ip_address VARCHAR(80) NULL,
+    electricity_rate_per_kwh DECIMAL(18,2) NOT NULL DEFAULT 0,
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT fk_system_settings_pressure_unit FOREIGN KEY (pressure_unit_id) REFERENCES measurement_units (id)
