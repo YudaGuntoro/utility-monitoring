@@ -40,12 +40,12 @@ function SummaryCard({
   unit?: string;
 }) {
   const accentClass = {
-    amber: "from-amber-400 via-orange-300 to-amber-400",
-    blue: "from-blue-500 via-sky-300 to-blue-500",
-    cyan: "from-cyan-400 via-sky-300 to-cyan-400",
-    emerald: "from-emerald-400 via-teal-300 to-emerald-400",
-    red: "from-red-500 via-rose-300 to-red-500",
-    violet: "from-violet-400 via-purple-300 to-violet-400",
+    amber: "bg-amber-400",
+    blue: "bg-blue-500",
+    cyan: "bg-cyan-400",
+    emerald: "bg-emerald-400",
+    red: "bg-red-500",
+    violet: "bg-violet-400",
   }[accent];
   const statusClass = {
     offline: "border-red-500/25 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200",
@@ -61,7 +61,7 @@ function SummaryCard({
   }[status ?? "waiting"];
 
   return (
-    <section className={`rounded-lg bg-gradient-to-br ${accentClass} p-px shadow-sm shadow-slate-200/70 dark:shadow-black/20`}>
+    <section className={`rounded-lg ${accentClass} p-px shadow-sm shadow-slate-200/70 dark:shadow-black/20`}>
       <div className="h-full rounded-[7px] bg-white p-5 dark:bg-[#111a2e]">
         <div className="flex items-start justify-between gap-3">
           <p className="text-sm font-extrabold text-slate-800 dark:text-white">{label}</p>
@@ -85,9 +85,9 @@ function SummaryCard({
 function PowerMeterCard({ device }: { device: PowerDevice }) {
   const latest = device.latest;
   const accentClass = {
-    offline: "from-red-500 via-red-400 to-rose-500",
-    online: "from-emerald-400 via-cyan-400 to-blue-500",
-    warning: "from-amber-400 via-orange-400 to-yellow-300",
+    offline: "bg-red-500",
+    online: "bg-emerald-400",
+    warning: "bg-amber-400",
   }[device.status];
 
   return (
@@ -95,7 +95,7 @@ function PowerMeterCard({ device }: { device: PowerDevice }) {
       className="relative block overflow-hidden rounded-lg border border-slate-200 bg-white p-5 pt-6 shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md dark:border-[#1d2f52] dark:bg-[#111a2e] dark:shadow-black/20"
       href={`/power-monitoring/devices/${device.id}`}
     >
-      <span className={`absolute left-0 right-0 top-0 h-1 bg-gradient-to-r ${accentClass}`} />
+      <span className={`absolute left-0 right-0 top-0 h-1 ${accentClass}`} />
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-black text-slate-950 dark:text-white">{device.name}</h2>
