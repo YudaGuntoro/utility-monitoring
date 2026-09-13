@@ -43,7 +43,7 @@ dotnet run --project Web.API\Web.API.csproj --urls http://localhost:5241
 Worker with continuous dummy MQTT publishing:
 
 ```powershell
-$env:MQTT_HOST="emqx.broker.io"
+$env:MQTT_HOST="broker.emqx.io"
 $env:SIMULATOR_ENABLED="true"
 $env:SIMULATOR_INTERVAL_SECONDS="5"
 $env:SIMULATOR_DEVICES="PM-01,PM-02,PM-03"

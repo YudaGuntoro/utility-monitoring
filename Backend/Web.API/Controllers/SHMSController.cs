@@ -347,7 +347,7 @@ DEALLOCATE PREPARE add_electricity_rate_statement;", cancellationToken);
         var host = Environment.GetEnvironmentVariable("MQTT_HOST");
         if (string.IsNullOrWhiteSpace(host))
         {
-            host = "emqx.broker.io";
+            host = "broker.emqx.io";
         }
 
         var portValue = Environment.GetEnvironmentVariable("MQTT_PORT");

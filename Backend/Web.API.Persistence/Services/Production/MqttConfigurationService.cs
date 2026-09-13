@@ -54,7 +54,7 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
     private static MqttConfigurationResponse BuildResponse(IReadOnlyList<MqttSensorTopicConfig> topics) =>
         new()
         {
-            BrokerHost = "emqx.broker.io",
+            BrokerHost = "broker.emqx.io",
             BrokerPort = 1883.ToString(CultureInfo.InvariantCulture),
             ClientId = "SHMSClient",
             Topics = topics.ToList()

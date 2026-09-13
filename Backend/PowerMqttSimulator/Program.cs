@@ -3,7 +3,7 @@ using System.Text.Json;
 using MQTTnet;
 using MQTTnet.Client;
 
-var host = Read("MQTT_HOST", "emqx.broker.io");
+var host = Read("MQTT_HOST", "broker.emqx.io");
 var port = int.TryParse(Environment.GetEnvironmentVariable("MQTT_PORT"), out var parsedPort) ? parsedPort : 1883;
 var username = Environment.GetEnvironmentVariable("MQTT_USERNAME");
 var password = Environment.GetEnvironmentVariable("MQTT_PASSWORD");
