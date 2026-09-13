@@ -46,10 +46,15 @@ dotnet run --project Backend\Web.API\Web.API.csproj
 Worker:
 
 ```powershell
-$env:MQTT_HOST="127.0.0.1"
+$env:MQTT_HOST="broker.emqx.io"
 $env:MQTT_TOPIC="utility/power/+/telemetry"
+$env:SIMULATOR_ENABLED="true"
+$env:SIMULATOR_INTERVAL_SECONDS="5"
+$env:SIMULATOR_DEVICES="PM-01,PM-02,PM-03"
 dotnet run --project Backend\Worker\Worker.csproj
 ```
+
+The Worker subscribes to `utility/power/+/telemetry` and, when `SIMULATOR_ENABLED=true`, continuously publishes dummy PM data to the same broker.
 
 Frontend:
 
@@ -65,7 +70,7 @@ Open `http://localhost:3000`.
 ## MQTT Simulator
 
 ```powershell
-$env:MQTT_HOST="127.0.0.1"
+$env:MQTT_HOST="broker.emqx.io"
 dotnet run --project Backend\PowerMqttSimulator\PowerMqttSimulator.csproj
 ```
 

@@ -18,7 +18,7 @@ namespace Worker.Infrastructure.Mqtt;
 
 public sealed class MqttClientService : BackgroundService, IMqttClientService, IMqttPublisher
 {
-	private const string DefaultBrokerAddress = "127.0.0.1";
+	private const string DefaultBrokerAddress = "broker.emqx.io";
 
 	private const string DefaultClientId = "Worker";
 
@@ -70,7 +70,7 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 		_messageHandler = messageHandler;
 		_topicConfigService = topicConfigService;
 		Config instance = Config.Instance;
-		_brokerAddress = ReadSetting(instance, "MQTT", "Host", "MQTT__Host", "MQTT_HOST") ?? "127.0.0.1";
+		_brokerAddress = ReadSetting(instance, "MQTT", "Host", "MQTT__Host", "MQTT_HOST") ?? DefaultBrokerAddress;
 		_port = ReadIntSetting(instance, "MQTT", "Port", 1883, "MQTT__Port", "MQTT_PORT");
 		_clientId = ReadSetting(instance, "MQTT", "ClientId", "MQTT__ClientId", "MQTT_CLIENT_ID") ?? "Worker";
 		_username = ReadSetting(instance, "MQTT", "Username", "MQTT__Username", "MQTT_USERNAME");
@@ -88,7 +88,7 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 
 	public void Configure(string brokerHost, int brokerPort)
 	{
-		string text = (string.IsNullOrWhiteSpace(brokerHost) ? "127.0.0.1" : brokerHost);
+		string text = (string.IsNullOrWhiteSpace(brokerHost) ? DefaultBrokerAddress : brokerHost);
 		int num = ((brokerPort > 0) ? brokerPort : 1883);
 		string text2 = (string.IsNullOrWhiteSpace(_clientId) ? $"{"Worker"}-{Environment.MachineName}-{Guid.NewGuid():N}" : _clientId);
 		MqttClientOptionsBuilder mqttClientOptionsBuilder = new MqttClientOptionsBuilder().WithClientId(text2).WithTcpServer(text, num).WithKeepAlivePeriod(TimeSpan.FromSeconds(30.0))
@@ -179,7 +179,7 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 		_stoppingToken = stoppingToken;
 		if (string.IsNullOrWhiteSpace(_brokerAddress))
 		{
-			_brokerAddress = "127.0.0.1";
+			_brokerAddress = DefaultBrokerAddress;
 		}
 		if (_port <= 0)
 		{

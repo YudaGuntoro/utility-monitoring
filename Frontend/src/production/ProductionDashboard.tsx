@@ -40,12 +40,12 @@ function SummaryCard({
   unit?: string;
 }) {
   const accentClass = {
-    amber: "bg-amber-400",
-    blue: "bg-blue-500",
-    cyan: "bg-cyan-400",
-    emerald: "bg-emerald-400",
-    red: "bg-red-500",
-    violet: "bg-violet-400",
+    amber: "from-amber-400 via-orange-300 to-amber-400",
+    blue: "from-blue-500 via-sky-300 to-blue-500",
+    cyan: "from-cyan-400 via-sky-300 to-cyan-400",
+    emerald: "from-emerald-400 via-teal-300 to-emerald-400",
+    red: "from-red-500 via-rose-300 to-red-500",
+    violet: "from-violet-400 via-purple-300 to-violet-400",
   }[accent];
   const statusClass = {
     offline: "border-red-500/25 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200",
@@ -61,22 +61,23 @@ function SummaryCard({
   }[status ?? "waiting"];
 
   return (
-    <section className="relative overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70 dark:border-[#1d2f52] dark:bg-[#111a2e] dark:shadow-black/20">
-      <span className={`absolute bottom-0 left-0 top-0 w-1 ${accentClass}`} />
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-extrabold text-slate-800 dark:text-white">{label}</p>
-        {status ? (
-          <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-extrabold capitalize ${statusClass}`}>
-            <span className={`size-2 rounded-full ${dotClass}`} />
-            {status}
-          </span>
-        ) : null}
+    <section className={`rounded-lg bg-gradient-to-br ${accentClass} p-px shadow-sm shadow-slate-200/70 dark:shadow-black/20`}>
+      <div className="h-full rounded-[7px] bg-white p-5 dark:bg-[#111a2e]">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-sm font-extrabold text-slate-800 dark:text-white">{label}</p>
+          {status ? (
+            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-extrabold capitalize ${statusClass}`}>
+              <span className={`size-2 rounded-full ${dotClass}`} />
+              {status}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-5 text-2xl font-black text-slate-950 dark:text-white">
+          {value}
+          {unit ? <span className="ml-2 text-sm font-extrabold text-slate-500 dark:text-slate-300">{unit}</span> : null}
+        </p>
+        {note ? <p className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-200">{note}</p> : null}
       </div>
-      <p className="mt-5 text-2xl font-black text-slate-950 dark:text-white">
-        {value}
-        {unit ? <span className="ml-2 text-sm font-extrabold text-slate-500 dark:text-slate-300">{unit}</span> : null}
-      </p>
-      {note ? <p className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-200">{note}</p> : null}
     </section>
   );
 }

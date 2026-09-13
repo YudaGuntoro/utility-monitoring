@@ -28,6 +28,7 @@ builder.Services.AddSingleton<MqttClientService>();
 builder.Services.AddSingleton<IMqttClientService>(serviceProvider => serviceProvider.GetRequiredService<MqttClientService>());
 builder.Services.AddSingleton<IMqttPublisher>(serviceProvider => serviceProvider.GetRequiredService<MqttClientService>());
 builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<MqttClientService>());
+builder.Services.AddHostedService<PowerDummyPublisherService>();
 
 var host = builder.Build();
 host.Services.GetRequiredService<ILoggerFactory>()
