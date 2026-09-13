@@ -1,12 +1,12 @@
-name: shms-system
+name: utility-monitoring
 
 services:
   api:
     build:
       context: ./Backend
       dockerfile: Web.API/Dockerfile
-    image: shms-system-api:latest
-    container_name: shms-api
+    image: utility-monitoring-api:latest
+    container_name: utility-monitoring-api
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -14,8 +14,8 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: ${MYSQL_CONNECTION_STRING}
-      Jwt__Issuer: ${JWT_ISSUER:-SHMSSystem}
-      Jwt__Audience: ${JWT_AUDIENCE:-SHMSSystem.Frontend}
+      Jwt__Issuer: ${JWT_ISSUER:-UtilityMonitoring}
+      Jwt__Audience: ${JWT_AUDIENCE:-UtilityMonitoring.Frontend}
       Jwt__SigningKey: ${JWT_SIGNING_KEY}
       Jwt__ExpiresHours: ${JWT_EXPIRES_HOURS:-8}
       Swagger__Enabled: ${SWAGGER_ENABLED:-false}
@@ -26,7 +26,7 @@ services:
     ports:
       - "${API_HOST_PORT:-5274}:8080"
     networks:
-      - shms-net
+      - utility-monitoring-net
 
   web:
     build:
@@ -35,8 +35,8 @@ services:
       args:
         NEXT_PUBLIC_API_BASE_URL: ""
         SERVER_API_BASE_URL: ${SERVER_API_BASE_URL:-http://api:8080}
-    image: shms-system-web:latest
-    container_name: shms-web
+    image: utility-monitoring-web:latest
+    container_name: utility-monitoring-web
     restart: unless-stopped
     depends_on:
       - api
@@ -46,14 +46,14 @@ services:
     ports:
       - "${FRONTEND_HOST_PORT:-8091}:3000"
     networks:
-      - shms-net
+      - utility-monitoring-net
 
   mqtt-broker:
     build:
       context: ./Backend
       dockerfile: MqttBrokerService/Dockerfile
-    image: shms-system-mqtt-broker:latest
-    container_name: shms-mqtt-broker
+    image: utility-monitoring-mqtt-broker:latest
+    container_name: utility-monitoring-mqtt-broker
     restart: unless-stopped
     environment:
       BROKER_HOST: 0.0.0.0
@@ -61,14 +61,14 @@ services:
     expose:
       - "1883"
     networks:
-      - shms-net
+      - utility-monitoring-net
 
   worker:
     build:
       context: ./Backend/Worker
       dockerfile: Dockerfile
-    image: shms-system-worker:latest
-    container_name: shms-worker
+    image: utility-monitoring-worker:latest
+    container_name: utility-monitoring-worker
     restart: unless-stopped
     depends_on:
       - api
@@ -80,7 +80,7 @@ services:
       MQTT_HOST: ${MQTT_HOST:-mqtt-broker}
       MQTT_PORT: ${MQTT_PORT:-1883}
       MQTT_CLIENT_ID: ${MQTT_CLIENT_ID:-Worker}
-      MQTT_TOPIC: ${MQTT_TOPIC:-shms_mqtt}
+      MQTT_TOPIC: ${MQTT_TOPIC:-utility/power/+/telemetry}
       MQTT_QOS: ${MQTT_QOS:-2}
       MQTT_USERNAME: ${MQTT_USERNAME:-}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-}
@@ -94,27 +94,27 @@ services:
       MAIN_SERVER_UPLOAD_URL: ${MAIN_SERVER_UPLOAD_URL:-}
       MAIN_SERVER_TIMEOUT_SECONDS: ${MAIN_SERVER_TIMEOUT_SECONDS:-5}
       REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING:-redis:6379}
-      REDIS_BUFFER_KEY: ${REDIS_BUFFER_KEY:-shms:mqtt:buffer}
+      REDIS_BUFFER_KEY: ${REDIS_BUFFER_KEY:-utility:mqtt:buffer}
     volumes:
-      - shms-worker-buffer:/app/buffer
+      - utility-monitoring-worker-buffer:/app/buffer
     networks:
-      - shms-net
+      - utility-monitoring-net
 
   redis:
     image: redis:7-alpine
-    container_name: shms-redis
+    container_name: utility-monitoring-redis
     restart: unless-stopped
     expose:
       - "6379"
     volumes:
-      - shms-redis-data:/data
+      - utility-monitoring-redis-data:/data
     networks:
-      - shms-net
+      - utility-monitoring-net
 
 networks:
-  shms-net:
+  utility-monitoring-net:
     driver: bridge
 
 volumes:
-  shms-worker-buffer:
-  shms-redis-data:
+  utility-monitoring-worker-buffer:
+  utility-monitoring-redis-data:
