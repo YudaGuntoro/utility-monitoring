@@ -6,6 +6,8 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { useToast } from "@/context/ToastContext";
 import { formatNumber, powerApi, type PowerDashboard, type PowerDevice } from "./powerMonitoring";
 
+const DASHBOARD_REFRESH_MS = 30_000;
+
 function formatTime(value?: string | null) {
   if (!value) return "No data";
   const date = new Date(value);
@@ -156,7 +158,11 @@ export default function ProductionDashboard() {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 5000);
+    const timer = window.setInterval(() => {
+      if (!document.hidden) {
+        void load();
+      }
+    }, DASHBOARD_REFRESH_MS);
     return () => window.clearInterval(timer);
   }, [load]);
 

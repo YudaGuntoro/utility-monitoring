@@ -12,6 +12,8 @@ import { fetchSystemSettings, readSystemSettings } from "./settings";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
+const DEVICE_DETAIL_REFRESH_MS = 60_000;
+
 const ranges = [
   { label: "1 Hour", hours: 1 },
   { label: "6 Hours", hours: 6 },
@@ -47,7 +49,11 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 5000);
+    const timer = window.setInterval(() => {
+      if (!document.hidden) {
+        void load();
+      }
+    }, DEVICE_DETAIL_REFRESH_MS);
     return () => window.clearInterval(timer);
   }, [load]);
 

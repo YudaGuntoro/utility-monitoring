@@ -20,8 +20,8 @@ type MqttBrokerStatus = {
   port?: number;
 };
 
-const MQTT_STATUS_POLL_MS = 10_000;
-const MQTT_BROKER_STATUS_POLL_MS = 5_000;
+const MQTT_STATUS_POLL_MS = 30_000;
+const MQTT_BROKER_STATUS_POLL_MS = 60_000;
 const timeFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
@@ -75,7 +75,11 @@ export default function MqttStatus() {
     };
 
     void loadStatus();
-    const timer = window.setInterval(() => void loadStatus(), MQTT_STATUS_POLL_MS);
+    const timer = window.setInterval(() => {
+      if (!document.hidden) {
+        void loadStatus();
+      }
+    }, MQTT_STATUS_POLL_MS);
 
     return () => {
       ignore = true;
@@ -100,7 +104,11 @@ export default function MqttStatus() {
     };
 
     void loadMqttBrokerStatus();
-    const timer = window.setInterval(() => void loadMqttBrokerStatus(), MQTT_BROKER_STATUS_POLL_MS);
+    const timer = window.setInterval(() => {
+      if (!document.hidden) {
+        void loadMqttBrokerStatus();
+      }
+    }, MQTT_BROKER_STATUS_POLL_MS);
 
     return () => {
       ignore = true;
