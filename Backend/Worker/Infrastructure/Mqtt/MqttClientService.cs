@@ -18,7 +18,7 @@ namespace Worker.Infrastructure.Mqtt;
 
 public sealed class MqttClientService : BackgroundService, IMqttClientService, IMqttPublisher
 {
-	private const string DefaultBrokerAddress = "broker.emqx.io";
+	private const string DefaultBrokerAddress = "127.0.0.1";
 
 	private const string DefaultClientId = "Worker";
 

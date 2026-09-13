@@ -5,7 +5,7 @@ namespace MqttBrokerService;
 
 public sealed class MqttBrokerWorker : BackgroundService
 {
-    private const string DefaultHost = "0.0.0.0";
+    private const string DefaultHost = "127.0.0.1";
     private const int DefaultPort = 1883;
 
     private readonly ILogger<MqttBrokerWorker> _logger;

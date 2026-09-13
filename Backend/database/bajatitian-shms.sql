@@ -199,7 +199,7 @@ ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), measurement_name = 
 INSERT INTO mqtt_broker_configs
     (id, config_name, host, port, client_id, use_tls, is_active)
 VALUES
-    (1, 'default', 'broker.emqx.io', 1883, 'SHMSClient', 0, 1)
+    (1, 'default', '127.0.0.1', 1883, 'SHMSClient', 0, 1)
 ON DUPLICATE KEY UPDATE
     host = VALUES(host),
     port = VALUES(port),
