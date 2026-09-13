@@ -8,7 +8,7 @@ var port = int.TryParse(Environment.GetEnvironmentVariable("MQTT_PORT"), out var
 var username = Environment.GetEnvironmentVariable("MQTT_USERNAME");
 var password = Environment.GetEnvironmentVariable("MQTT_PASSWORD");
 var clientId = Read("MQTT_CLIENT_ID", $"PowerSimulator-{Environment.MachineName}");
-var intervalSeconds = int.TryParse(Environment.GetEnvironmentVariable("SIMULATOR_INTERVAL_SECONDS"), out var parsedInterval) ? Math.Max(1, parsedInterval) : 5;
+var intervalSeconds = int.TryParse(Environment.GetEnvironmentVariable("SIMULATOR_INTERVAL_SECONDS"), out var parsedInterval) ? Math.Max(1, parsedInterval) : 1;
 var devices = Read("SIMULATOR_DEVICES", "PM-01,PM-02,PM-03,PM-04,PM-05")
     .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 

@@ -23,7 +23,7 @@ public sealed class PowerDummyPublisherService : BackgroundService
 
         var config = Config.Instance;
         _enabled = ReadBoolSetting(config, "Simulator", "Enabled", true, "SIMULATOR_ENABLED");
-        _interval = TimeSpan.FromSeconds(Math.Max(1, ReadIntSetting(config, "Simulator", "IntervalSeconds", 5, "SIMULATOR_INTERVAL_SECONDS")));
+        _interval = TimeSpan.FromSeconds(Math.Max(1, ReadIntSetting(config, "Simulator", "IntervalSeconds", 1, "SIMULATOR_INTERVAL_SECONDS")));
         _qos = ReadIntSetting(config, "Simulator", "Qos", 1, "SIMULATOR_QOS");
         _devices = ReadDevices(config);
         _energies = _devices.ToDictionary(device => device, _ => 125_000m + (decimal)(_random.NextDouble() * 2_000));
