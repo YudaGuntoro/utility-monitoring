@@ -130,13 +130,14 @@ public sealed class MqttBrokerWorker : BackgroundService
         public static BrokerSettings Load()
         {
             var values = ReadIni(SettingsPath);
-            var hostText = Read(values, "Broker", "Host") ?? DefaultHost;
+            var hostText = ReadEnvironment("BROKER_HOST", "MQTT_BROKER_HOST") ?? Read(values, "Broker", "Host") ?? DefaultHost;
             var host = ParseHost(hostText);
-            var port = int.TryParse(Read(values, "Broker", "Port"), out var parsedPort) && parsedPort > 0
+            var portText = ReadEnvironment("BROKER_PORT", "MQTT_BROKER_PORT") ?? Read(values, "Broker", "Port");
+            var port = int.TryParse(portText, out var parsedPort) && parsedPort > 0
                 ? parsedPort
                 : DefaultPort;
-            var username = NullIfWhiteSpace(Read(values, "Broker", "Username"));
-            var password = Read(values, "Broker", "Password") ?? string.Empty;
+            var username = NullIfWhiteSpace(ReadEnvironment("BROKER_USERNAME", "MQTT_BROKER_USERNAME") ?? Read(values, "Broker", "Username"));
+            var password = ReadEnvironment("BROKER_PASSWORD", "MQTT_BROKER_PASSWORD") ?? Read(values, "Broker", "Password") ?? string.Empty;
 
             return new BrokerSettings(hostText, host, port, username, password);
         }
@@ -158,6 +159,20 @@ public sealed class MqttBrokerWorker : BackgroundService
         private static string? NullIfWhiteSpace(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string? ReadEnvironment(params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                var value = Environment.GetEnvironmentVariable(key);
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value.Trim();
+                }
+            }
+
+            return null;
         }
 
         private static string? Read(Dictionary<string, Dictionary<string, string>> values, string section, string key)
