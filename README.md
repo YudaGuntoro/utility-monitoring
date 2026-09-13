@@ -46,7 +46,7 @@ dotnet run --project Backend\Web.API\Web.API.csproj
 Worker:
 
 ```powershell
-$env:MQTT_HOST="broker.emqx.io"
+$env:MQTT_HOST="emqx.broker.io"
 $env:MQTT_TOPIC="utility/power/+/telemetry"
 $env:SIMULATOR_ENABLED="true"
 $env:SIMULATOR_INTERVAL_SECONDS="5"
@@ -70,7 +70,7 @@ Open `http://localhost:3000`.
 ## MQTT Simulator
 
 ```powershell
-$env:MQTT_HOST="broker.emqx.io"
+$env:MQTT_HOST="emqx.broker.io"
 dotnet run --project Backend\PowerMqttSimulator\PowerMqttSimulator.csproj
 ```
 

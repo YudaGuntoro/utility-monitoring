@@ -244,7 +244,7 @@ public class MqttBrokerConfig
 {
     public int Id { get; set; }
     public string ConfigName { get; set; } = "default";
-    public string Host { get; set; } = "localhost";
+    public string Host { get; set; } = "emqx.broker.io";
     public int Port { get; set; } = 1883;
     public string ClientId { get; set; } = "SHMSClient";
     public string? Username { get; set; }
@@ -302,7 +302,7 @@ public class ServerSyncStatus
 public class MqttConfigurationResponse
 {
     [JsonPropertyName("broker_host")]
-    public string BrokerHost { get; set; } = "localhost";
+    public string BrokerHost { get; set; } = "emqx.broker.io";
 
     [JsonPropertyName("broker_port")]
     public string BrokerPort { get; set; } = "1883";
