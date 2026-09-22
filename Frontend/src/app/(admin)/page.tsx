@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import ProductionDashboard from "@/production/ProductionDashboard";
+import EnergyPanelDashboard from "@/production/EnergyPanelDashboard";
 
 export const metadata: Metadata = {
-  title: "Utility Monitoring | Power Monitoring",
-  description: "Utility Monitoring power dashboard",
+  title: "Dashboard | Energy Monitoring System",
+  description: "Energy Monitoring System energy consumption dashboard",
 };
 
 export default function UtilityMonitoringHome() {
-  return <ProductionDashboard />;
+  return <EnergyPanelDashboard />;
 }

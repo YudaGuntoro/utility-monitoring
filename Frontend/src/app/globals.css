@@ -198,23 +198,23 @@
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/[0.14] dark:text-brand-300;
+  @apply border border-orange-200 bg-orange-50 text-orange-700 shadow-sm shadow-orange-100/70 dark:border-transparent dark:bg-gradient-to-r dark:from-orange-500 dark:to-orange-600 dark:text-white dark:shadow-lg dark:shadow-orange-950/20;
 }
 
 @utility menu-item-inactive {
-  @apply text-slate-600 hover:bg-brand-50 hover:text-brand-700 group-hover:text-brand-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply text-slate-600 hover:bg-brand-50 hover:text-brand-700 group-hover:text-brand-700 dark:text-slate-200 dark:hover:bg-white/8 dark:hover:text-white dark:group-hover:text-white;
 }
 
 @utility menu-item-icon {
-  @apply text-slate-500 group-hover:text-brand-600 dark:text-gray-400;
+  @apply text-slate-500 group-hover:text-brand-600 dark:text-slate-300 dark:group-hover:text-white;
 }
 
 @utility menu-item-icon-active {
-  @apply text-brand-600 dark:text-brand-300;
+  @apply text-orange-600 dark:text-white;
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-slate-500 group-hover:text-brand-600 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-slate-500 group-hover:text-brand-600 dark:text-slate-300 dark:group-hover:text-white;
 }
 
 @utility menu-item-arrow {
@@ -911,9 +911,48 @@ span.flatpickr-weekday,
   }
 }
 
-/* Utility Monitoring global contrast and table header polish */
+/* Energy Monitoring System global contrast and table header polish */
+.app-main-content {
+  background-color: #f3f7fc;
+}
+
+.dark .app-main-content {
+  background-color: #f3f7fc;
+}
+
+.dark .energy-light-surface {
+  background-color: #eef4fb !important;
+  color: #0f172a !important;
+}
+
+.dark .energy-light-surface .dark\:text-white,
+.dark .energy-light-surface .dark\:text-slate-100 {
+  color: #0f172a !important;
+}
+
+.dark .energy-light-surface .dark\:text-slate-200,
+.dark .energy-light-surface .dark\:text-slate-300,
+.dark .energy-light-surface .dark\:text-slate-400 {
+  color: #64748b !important;
+}
+
+.dark .energy-light-surface .dark\:bg-\[\#071d37\],
+.dark .energy-light-surface .dark\:bg-\[\#071d37\]\/90,
+.dark .energy-light-surface .dark\:bg-\[\#061b34\],
+.dark .energy-light-surface .dark\:bg-\[\#061b34\]\/55,
+.dark .energy-light-surface .dark\:bg-\[\#061b34\]\/60,
+.dark .energy-light-surface .dark\:bg-sky-950\/40 {
+  background-color: #ffffff !important;
+}
+
+.dark .energy-light-surface .dark\:border-sky-400\/20,
+.dark .energy-light-surface .dark\:border-sky-300\/10,
+.dark .energy-light-surface .dark\:border-sky-300\/20 {
+  border-color: #e2e8f0 !important;
+}
+
 :where(table thead, table thead tr, table thead th, table thead td) {
-  background-color: #267fee !important;
+  background-color: #f97316 !important;
   color: #ffffff !important;
 }
 
@@ -940,7 +979,7 @@ table thead td:last-child {
 }
 
 .leak-rounded-header-table thead th {
-  background-color: #267fee !important;
+  background-color: #f97316 !important;
 }
 
 .leak-rounded-header-table thead th:first-child {
@@ -973,4 +1012,149 @@ table thead td:last-child {
 
 .dark button:disabled {
   opacity: 0.9;
+}
+
+/* Keep dashboard content light in both themes. Only the app chrome changes. */
+.dark .app-main-content,
+.dark .energy-light-surface {
+  background-color: #eef4fb !important;
+  color: #0f172a !important;
+}
+
+.dark .energy-light-surface :is(section, table, tbody, tr, td, input, .flatpickr-wrapper) {
+  color: inherit;
+}
+
+.dark .energy-light-surface :is(.bg-white, .fill-white) {
+  background-color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.dark .energy-light-surface :is(.bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80) {
+  background-color: #f8fafc !important;
+}
+
+.dark .energy-light-surface :is(
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700,
+  .text-gray-800
+) {
+  color: #0f172a !important;
+}
+
+.dark .energy-light-surface :is(
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400,
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400
+) {
+  color: #64748b !important;
+}
+
+.dark .energy-light-surface input#energy-dashboard-date {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+.dark .power-monitoring-light-surface {
+  color: #0f172a !important;
+}
+
+.dark .power-monitoring-light-surface :is(.bg-white) {
+  background-color: #ffffff !important;
+}
+
+.dark .power-monitoring-light-surface :is(.bg-slate-50, .bg-slate-100) {
+  background-color: #f8fafc !important;
+}
+
+.dark .power-monitoring-light-surface :is(
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700
+) {
+  color: #0f172a !important;
+}
+
+.dark .power-monitoring-light-surface :is(
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400
+) {
+  color: #64748b !important;
+}
+
+.dark .content-light-surface {
+  color: #0f172a !important;
+}
+
+.dark .content-light-surface :is(
+  .bg-white,
+  .dark\:bg-white,
+  .dark\:bg-slate-900,
+  .dark\:bg-slate-950,
+  .dark\:bg-gray-900
+) {
+  background-color: #ffffff !important;
+}
+
+.dark .content-light-surface :is(
+  .bg-slate-50,
+  .bg-slate-100,
+  .dark\:bg-slate-800,
+  .dark\:bg-gray-800
+) {
+  background-color: #f8fafc !important;
+}
+
+.dark .content-light-surface :is(
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700,
+  .text-gray-900,
+  .text-gray-800,
+  .dark\:text-white,
+  .dark\:text-white\/90,
+  .dark\:text-slate-100,
+  .dark\:text-slate-200
+) {
+  color: #0f172a !important;
+}
+
+.dark .content-light-surface :is(
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400,
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400,
+  .dark\:text-slate-300,
+  .dark\:text-slate-400,
+  .dark\:text-gray-400
+) {
+  color: #64748b !important;
+}
+
+.dark .content-light-surface :is(input, textarea, select) {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.dark .flatpickr-calendar {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+  color: #475569 !important;
+}
+
+.dark .flatpickr-calendar :is(.flatpickr-day, .cur-month, .cur-year, span.flatpickr-weekday) {
+  color: #334155 !important;
+  fill: #334155 !important;
 }

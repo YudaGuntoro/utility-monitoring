@@ -52,8 +52,8 @@ export const navItems: NavItem[] = [
   },
   {
     icon: <BoltIcon />,
-    name: "Power Monitoring",
-    path: "/",
+    name: "Data Monitor",
+    path: "/power-monitoring",
   },
   {
     icon: <BoltIcon />,

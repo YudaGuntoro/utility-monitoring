@@ -4,6 +4,23 @@
 
 SET SESSION cte_max_recursion_depth = 1000;
 
+INSERT INTO power_devices (device_code, name, model, location, gateway_id, mqtt_topic, status, enabled)
+VALUES
+    ('PM-01', 'Production 1', 'Schneider PM8000 / PM8240', 'Production Area 1', 'GW-01', 'utility/power/PM-01/telemetry', 'online', 1),
+    ('PM-02', 'Production 2', 'Schneider PM8000 / PM8240', 'Production Area 2', 'GW-01', 'utility/power/PM-02/telemetry', 'online', 1),
+    ('PM-03', 'Compressor', 'Schneider PM8000 / PM8240', 'Compressor Room', 'GW-01', 'utility/power/PM-03/telemetry', 'warning', 1),
+    ('PM-04', 'HVAC', 'Schneider PM8000 / PM8240', 'Utility Roof Deck', 'GW-02', 'utility/power/PM-04/telemetry', 'warning', 1),
+    ('PM-05', 'Utility', 'Schneider PM8000 / PM8240', 'Main Utility Room', 'GW-02', 'utility/power/PM-05/telemetry', 'online', 1)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    model = VALUES(model),
+    location = VALUES(location),
+    gateway_id = VALUES(gateway_id),
+    mqtt_topic = VALUES(mqtt_topic),
+    status = VALUES(status),
+    enabled = VALUES(enabled),
+    updated_at = NOW();
+
 DELETE h
 FROM power_telemetry_history h
 JOIN power_devices d ON d.id = h.device_id
@@ -135,4 +152,3 @@ SET d.last_seen = l.timestamp,
     d.status = 'online',
     d.enabled = 1,
     d.updated_at = NOW();
-

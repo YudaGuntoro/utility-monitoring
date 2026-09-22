@@ -48,7 +48,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 mb-6 mx-4">
       <h2
-        className="text-xl font-semibold text-gray-800 dark:text-white/90"
+        className="text-xl font-semibold text-gray-800"
         x-text="pageName"
       >
         {pageTitle}
@@ -57,7 +57,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({
         <ol className="flex items-center gap-2">
           <li className="flex items-center">
             <Link
-              className="text-sm font-medium text-gray-500 hover:text-brand-500 dark:text-gray-400 transition-colors"
+              className="text-sm font-medium text-gray-500 transition-colors hover:text-brand-500"
               href="/"
             >
               Home
@@ -66,14 +66,14 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({
           <BreadcrumbSeparator />
           {matchedParentTitle && (
             <>
-              <li className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <li className="text-sm font-medium text-gray-500">
                 {matchedParentTitle}
               </li>
               <BreadcrumbSeparator />
             </>
           )}
           <li
-            className="text-sm font-medium text-gray-800 dark:text-white/90"
+            className="text-sm font-medium text-gray-800"
             aria-current="page"
           >
             {pageTitle}

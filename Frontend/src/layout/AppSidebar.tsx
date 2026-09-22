@@ -119,7 +119,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-4 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-[#dbe7f5] shadow-[8px_0_28px_rgba(21,84,179,0.04)]
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-4 left-0 bg-white text-gray-900 dark:bg-[#0d1d2b] dark:text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-[#dbe7f5] shadow-[8px_0_28px_rgba(21,84,179,0.04)] dark:border-white/10 dark:shadow-[8px_0_28px_rgba(2,8,23,0.22)]
         ${isExpanded || isMobileOpen
           ? "w-[290px]"
           : isHovered
@@ -150,7 +150,7 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 dark:text-slate-400 ${!isExpanded && !isHovered
                   ? "lg:justify-center"
                   : "justify-start"
                   }`}

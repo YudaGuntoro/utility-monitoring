@@ -105,7 +105,7 @@ export default function DeviceManagementPage() {
         location: form.location.trim(),
         model: form.model.trim() || "Schneider PM8000 / PM8240",
         mqtt_topic: form.mqtt_topic.trim() || topicForDevice(deviceCode),
-        name: form.name.trim() || `Power Meter ${deviceCode}`,
+        name: form.name.trim() || `Energy Meter ${deviceCode}`,
       };
       if (editing) {
         await powerApi.updateDevice(editing.id, payload);
@@ -140,7 +140,7 @@ export default function DeviceManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="content-light-surface space-y-6 text-slate-900">
       <PageBreadcrumb pageTitle="Devices" />
 
       <div className="flex justify-end">
@@ -154,7 +154,7 @@ export default function DeviceManagementPage() {
         </button>
       </div>
 
-      <section className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/10">
+      <section className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/60">
         <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="bg-brand-500 text-xs uppercase text-white">
             <tr>
@@ -165,14 +165,14 @@ export default function DeviceManagementPage() {
           </thead>
           <tbody>
             {devices.map((device) => (
-              <tr className="border-t border-slate-100 text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-950/60" key={device.id}>
-                <td className="px-4 py-3 font-black text-slate-950 dark:text-white">{device.device_code}</td>
+              <tr className="border-t border-slate-100 text-slate-700 transition-colors hover:bg-slate-50" key={device.id}>
+                <td className="px-4 py-3 font-black text-slate-950">{device.device_code}</td>
                 <td className="px-4 py-3">{device.name}</td>
                 <td className="px-4 py-3">{device.model}</td>
                 <td className="px-4 py-3">{device.location || "-"}</td>
                 <td className="px-4 py-3">{device.gateway_id || "-"}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">{device.mqtt_topic}</td>
-                <td className="px-4 py-3 capitalize text-slate-700 dark:text-slate-200">{device.status}</td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-600">{device.mqtt_topic}</td>
+                <td className="px-4 py-3 capitalize text-slate-700">{device.status}</td>
                 <td className="px-4 py-3">{device.last_seen ? new Date(device.last_seen).toLocaleString() : "-"}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
@@ -188,7 +188,7 @@ export default function DeviceManagementPage() {
             ))}
           </tbody>
         </table>
-        {!loading && devices.length === 0 ? <p className="p-8 text-center text-sm font-semibold text-slate-500 dark:text-slate-300">No devices found.</p> : null}
+        {!loading && devices.length === 0 ? <p className="p-8 text-center text-sm font-semibold text-slate-500">No devices found.</p> : null}
       </section>
 
       <ConfirmModal
@@ -206,14 +206,14 @@ export default function DeviceManagementPage() {
           if (!deleting) setDeviceToDelete(null);
         }}
         onConfirm={() => void remove()}
-        title="Delete Power Meter"
+        title="Delete Energy Meter"
       />
 
       <Modal isOpen={isFormOpen} onClose={reset} className="mx-4 max-w-[760px] overflow-hidden p-0">
         <form onSubmit={(event) => void submit(event)}>
-          <div className="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+          <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-600">Power Monitoring</p>
-            <h2 className="mt-2 text-lg font-black text-slate-900 dark:text-white">
+            <h2 className="mt-2 text-lg font-black text-slate-900">
               {editing ? "Edit Device" : "Add Device"}
             </h2>
           </div>
@@ -227,9 +227,9 @@ export default function DeviceManagementPage() {
             <Field label="MQTT Topic" value={form.mqtt_topic} onChange={(value) => updateForm({ mqtt_topic: value })} placeholder="utility/power/PM-06/telemetry" />
           </div>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
             <button
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={saving}
               onClick={reset}
               type="button"
@@ -262,8 +262,8 @@ function ActionIconButton({
   tone?: "default" | "danger";
 }) {
   const toneClass = {
-    danger: "border-red-200 bg-white text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-slate-900 dark:text-red-400 dark:hover:bg-red-500/10",
-    default: "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800",
+    danger: "border-red-200 bg-white text-red-600 hover:bg-red-50",
+    default: "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
   }[tone];
 
   return (
@@ -293,10 +293,10 @@ function Field({
   value: string;
 }) {
   return (
-    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
+    <label className="block text-sm font-bold text-slate-700">
       {label}
       <input
-        className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+        className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/10"
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}

@@ -74,10 +74,10 @@ export default function SignInPage() {
         <div className="rounded-lg border border-white/18 bg-[#172231]/84 px-8 py-10 shadow-[0_28px_80px_rgba(0,0,0,0.36)] backdrop-blur-[6px] sm:px-8">
           <div className="mb-8 text-center">
             <h1 className="text-[15px] font-extrabold leading-tight text-white whitespace-nowrap sm:text-[20px] md:text-[22px]">
-              Utility Monitoring
+              Energy Monitoring System
             </h1>
-            <p className="mt-2 text-sm font-medium text-[#9db8d2]">Power Monitoring System</p>
-            <p className="mt-3 text-sm text-[#b8c7d8]">Electrical utility telemetry dashboard</p>
+            <p className="mt-2 text-sm font-medium text-[#9db8d2]">Electrical utility telemetry dashboard</p>
+            <p className="mt-3 text-sm text-[#b8c7d8]">Monitor panel energy, devices, and live power data</p>
           </div>
 
           <form autoComplete="off" data-form-type="other" onSubmit={(event) => void submit(event)}>
@@ -171,7 +171,7 @@ export default function SignInPage() {
         </div>
 
         <p className="mt-7 text-center text-[11px] font-medium text-[#89a1b8]/80">
-          © 2026 Utility Monitoring. All rights reserved.
+          Copyright 2026 Energy Monitoring System. All rights reserved.
         </p>
       </div>
     </div>

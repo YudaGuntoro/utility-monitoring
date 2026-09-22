@@ -117,17 +117,17 @@ export default function MqttStatus() {
   }, []);
 
   return (
-    <div className="flex h-11 max-w-full items-center gap-3 overflow-hidden rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-500 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 sm:px-4">
+    <div className="flex h-10 max-w-full items-center gap-3 overflow-hidden rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-500 shadow-theme-xs dark:border-white/10 dark:bg-white/5 dark:text-slate-300 sm:px-4">
       <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${mqttBrokerOnline ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
         <span className={`size-2 rounded-full ${mqttBrokerOnline ? "bg-emerald-500" : "bg-rose-500"}`} />
         Broker {mqttBrokerOnline ? "Online" : "Offline"}
       </span>
-      <span className="h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-800" />
+      <span className="h-5 w-px shrink-0 bg-gray-200 dark:bg-white/10" />
       <span className="truncate">
-        Last Update: <span className="font-bold text-gray-700 dark:text-gray-200">API {formatTime(lastApiAt)}</span>
+        Last Update: <span className="font-bold text-gray-700 dark:text-white">API {formatTime(lastApiAt)}</span>
       </span>
-      <span className="h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-800" />
-      <span className="shrink-0 font-bold text-gray-700 dark:text-gray-200">MQTT {formatTime(lastMqttAt)}</span>
+      <span className="h-5 w-px shrink-0 bg-gray-200 dark:bg-white/10" />
+      <span className="shrink-0 font-bold text-gray-700 dark:text-white">MQTT {formatTime(lastMqttAt)}</span>
     </div>
   );
 }

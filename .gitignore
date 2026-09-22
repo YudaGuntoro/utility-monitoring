@@ -38,6 +38,7 @@ deploy/*.env
 **/.verify-*/
 **/verify-bin/
 **/verify-obj/
+**/bin-verify/
 **/.next-old-*/
 MaintenanceApp/.codex/
 MaintenanceApp/DatabaseMigratorTemp/

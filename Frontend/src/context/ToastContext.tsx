@@ -34,12 +34,12 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 const toastStyles: Record<ToastType, string> = {
   error:
-    "border-gray-200 border-l-error-500 bg-white text-gray-800 dark:border-gray-800 dark:border-l-error-500 dark:bg-gray-900 dark:text-gray-100",
-  info: "border-gray-200 border-l-brand-500 bg-white text-gray-800 dark:border-gray-800 dark:border-l-brand-500 dark:bg-gray-900 dark:text-gray-100",
+    "border-gray-200 border-l-error-500 bg-white text-gray-900 shadow-slate-200/80",
+  info: "border-gray-200 border-l-brand-500 bg-white text-gray-900 shadow-slate-200/80",
   success:
-    "border-gray-200 border-l-success-600 bg-white text-gray-800 dark:border-gray-800 dark:border-l-success-500 dark:bg-gray-900 dark:text-gray-100",
+    "border-gray-200 border-l-success-600 bg-white text-gray-900 shadow-slate-200/80",
   warning:
-    "border-gray-200 border-l-warning-500 bg-white text-gray-800 dark:border-gray-800 dark:border-l-warning-500 dark:bg-gray-900 dark:text-gray-100",
+    "border-gray-200 border-l-warning-500 bg-white text-gray-900 shadow-slate-200/80",
 };
 
 const defaultTitles: Record<ToastType, string> = {
@@ -107,11 +107,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
                 <p className="text-sm font-bold">
                   {toast.title ?? defaultTitles[toast.type]}
                 </p>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{toast.message}</p>
+                <p className="mt-1 text-sm text-gray-600">{toast.message}</p>
               </div>
               <button
                 aria-label="Close toast"
-                className="rounded-md px-2 text-lg leading-none opacity-70 hover:opacity-100"
+                className="rounded-md px-2 text-lg leading-none text-gray-500 opacity-80 hover:text-gray-900 hover:opacity-100"
                 onClick={() => removeToast(toast.id)}
                 type="button"
               >

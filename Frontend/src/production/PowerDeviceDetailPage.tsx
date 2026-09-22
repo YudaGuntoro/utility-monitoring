@@ -98,12 +98,12 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      <PageBreadcrumb pageTitle={device?.name ?? "Power Meter"} parentTitle="Power Monitoring" />
+      <PageBreadcrumb pageTitle={device?.name ?? "Energy Meter"} parentTitle="Data Monitor" />
 
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Power Monitoring</p>
-          <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{device?.name ?? "Power Meter"}</h1>
+          <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{device?.name ?? "Energy Meter"}</h1>
           <p className="mt-2 text-sm font-semibold text-slate-500">
             {device?.device_code ?? "-"} · {device?.model ?? "-"} · {device?.location ?? "-"} · {device?.gateway_id ?? "-"}
           </p>
