@@ -77,7 +77,11 @@
 .content :global(.modal) > div:last-child { border: 1px solid #dfe5ee; border-radius: 8px; background: white !important; }
 
 .auth {
-  background: #f5f7fb;
+  background-color: #172b4d;
+  background-image: linear-gradient(rgba(10, 25, 38, 0.48), rgba(10, 25, 38, 0.48)), url('/images/auth/utility-login-background.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   color: #172b4d;
   font-family: var(--font-outfit);
 }

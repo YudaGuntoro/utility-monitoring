@@ -165,7 +165,7 @@ export default function SignInPage() {
           </form>
         </div>
 
-        <p className="mt-7 text-center text-[11px] font-medium text-slate-500">
+        <p className="mt-7 text-center text-[11px] font-medium text-white">
           Copyright 2026 Utility Monitoring System. All rights reserved.
         </p>
       </div>
