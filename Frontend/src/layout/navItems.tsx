@@ -52,8 +52,18 @@ export const navItems: NavItem[] = [
   },
   {
     icon: <BoltIcon />,
-    name: "Data Monitor",
+    name: "Power Monitoring",
     path: "/power-monitoring",
+  },
+  {
+    icon: <GridIcon />,
+    name: "Water Monitoring",
+    path: "/water-monitoring",
+  },
+  {
+    icon: <GridIcon />,
+    name: "Compressed Air",
+    path: "/compressed-air",
   },
   {
     icon: <BoltIcon />,

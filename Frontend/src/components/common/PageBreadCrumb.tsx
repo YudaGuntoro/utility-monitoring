@@ -46,14 +46,14 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({
     )?.name;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6 mx-4">
-      <h2
-        className="text-xl font-semibold text-gray-800"
-        x-text="pageName"
-      >
+    <header data-utility-header className="mb-6">
+      <div>
+      <p data-utility-eyebrow>Utility Monitoring System</p>
+      <h1 className="text-xl font-semibold text-gray-800">
         {pageTitle}
-      </h2>
-      <nav>
+      </h1>
+      </div>
+      <nav aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
           <li className="flex items-center">
             <Link
@@ -80,7 +80,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({
           </li>
         </ol>
       </nav>
-    </div>
+    </header>
   );
 };
 

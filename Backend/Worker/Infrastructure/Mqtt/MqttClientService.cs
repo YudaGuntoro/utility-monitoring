@@ -44,6 +44,8 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 
 	private readonly string? _password;
 
+	private readonly bool _useTls;
+
 	private readonly int _qos;
 
 	private readonly TimeSpan _retryDelay;
@@ -75,6 +77,7 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 		_clientId = ReadSetting(instance, "MQTT", "ClientId", "MQTT__ClientId", "MQTT_CLIENT_ID") ?? "Worker";
 		_username = ReadSetting(instance, "MQTT", "Username", "MQTT__Username", "MQTT_USERNAME");
 		_password = ReadSetting(instance, "MQTT", "Password", "MQTT__Password", "MQTT_PASSWORD");
+		_useTls = ReadBoolSetting(instance, "MQTT", "UseTls", false, "MQTT__UseTls", "MQTT_USE_TLS");
 		_qos = ReadIntSetting(instance, "MQTT", "Qos", 2, "MQTT__Qos", "MQTT_QOS");
 		_retryDelay = TimeSpan.FromSeconds(Math.Max(1, ReadIntSetting(instance, "Worker", "ReconnectDelaySeconds", 3, "Worker__ReconnectDelaySeconds", "WORKER_RECONNECT_DELAY_SECONDS")));
 		_loopInterval = TimeSpan.FromSeconds(Math.Max(1, ReadIntSetting(instance, "Worker", "IntervalSeconds", 1, "Worker__IntervalSeconds", "WORKER_INTERVAL_SECONDS")));
@@ -97,8 +100,16 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 		{
 			mqttClientOptionsBuilder.WithCredentials(_username, _password ?? string.Empty);
 		}
+		if (_useTls)
+		{
+			mqttClientOptionsBuilder.WithTlsOptions(options =>
+			{
+				options.UseTls();
+				options.WithTargetHost(text);
+			});
+		}
 		_mqttClientOptions = mqttClientOptionsBuilder.Build();
-		_logger.LogInformation("[MQTT] Config: Host={Host} Port={Port} ClientId={ClientId}", text, num, text2);
+		_logger.LogInformation("[MQTT] Config: Host={Host} Port={Port} ClientId={ClientId} UseTls={UseTls}", text, num, text2, _useTls);
 	}
 
 	public async Task ConnectAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -287,7 +298,7 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 		}
 		catch (Exception exception)
 		{
-			_logger.LogError(exception, "[MQTT] Failed to save message to SHMS storage. Topic={Topic}", topic);
+			_logger.LogError(exception, "[MQTT] Failed to save message to Utility storage. Topic={Topic}", topic);
 		}
 	}
 
@@ -382,6 +393,20 @@ public sealed class MqttClientService : BackgroundService, IMqttClientService, I
 	{
 		string? s = ReadSetting(cfg, section, key, environmentKeys);
 		return int.TryParse(s, out var result) ? result : cfg.ReadInt(key, section, defaultValue);
+	}
+
+	private static bool ReadBoolSetting(Config cfg, string section, string key, bool defaultValue, params string[] environmentKeys)
+	{
+		string? s = ReadSetting(cfg, section, key, environmentKeys);
+		if (bool.TryParse(s, out var result))
+		{
+			return result;
+		}
+		if (int.TryParse(s, out var intResult))
+		{
+			return intResult != 0;
+		}
+		return defaultValue;
 	}
 
 	private static MqttQualityOfServiceLevel ToQualityOfServiceLevel(int qos)

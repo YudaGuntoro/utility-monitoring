@@ -1,5 +1,5 @@
 -- Utility Monitoring - 30 days dummy power telemetry.
--- Run after Backend/database/bajatitian-shms.sql:
+-- Run after Backend/database/utility-system.sql:
 -- mysql -u root -p utility-system < Backend/database/seed_power_dummy_30d.sql
 
 SET SESSION cte_max_recursion_depth = 1000;

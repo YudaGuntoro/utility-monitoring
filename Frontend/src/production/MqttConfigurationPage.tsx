@@ -21,6 +21,9 @@ const tableInputClass = "h-11 w-full min-w-0 rounded-lg border border-slate-300 
 const labelClass = "text-xs font-bold uppercase text-slate-600 dark:text-slate-300";
 
 const sensorDescriptions: Record<MqttSensorCode, string> = {
+  POWER: "Telemetry listrik dari power meter.",
+  WATER: "Debit, total volume, dan tekanan air.",
+  AIR: "Flow udara, tekanan, temperatur, dan daya kompresor.",
   ACC: "Getaran dan akselerasi struktur.",
   ATRH: "Air temperature dan relative humidity.",
   TILT: "Kemiringan struktur dari tilt sensor.",
@@ -127,7 +130,7 @@ export default function MqttConfigurationPage() {
         <PageBreadcrumb pageTitle="MQTT Configuration" />
 
         <form
-          className="mx-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
           onSubmit={submit}
         >
           <div className="border-b border-slate-200 px-5 py-5 dark:border-slate-800">
@@ -207,7 +210,7 @@ export default function MqttConfigurationPage() {
                         className={tableInputClass}
                         disabled={!sensor.enabled}
                         onChange={(event) => updateTopic(sensor.code, { topic: event.target.value })}
-                        placeholder={`shms/${sensor.code.toLowerCase()}`}
+                        placeholder={`utility/${sensor.code.toLowerCase()}01/raw`}
                         value={sensor.topic}
                       />
                     </td>

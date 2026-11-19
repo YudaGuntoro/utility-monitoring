@@ -8,10 +8,13 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
 {
     private static readonly MqttSensorTopicConfig[] DefaultTopics =
     [
-        new() { Code = "TILT", Name = "Tilt Sensor", Topic = "shms/tilt", Qos = 1, Enabled = true },
-        new() { Code = "VW", Name = "Vibrating Wire Sensor", Topic = "shms/vw", Qos = 1, Enabled = true },
-        new() { Code = "ATRH", Name = "Air Temperature & RH Sensor", Topic = "shms/atrh", Qos = 1, Enabled = true },
-        new() { Code = "ACC", Name = "Accelerometer Sensor", Topic = "shms/acc", Qos = 1, Enabled = true }
+        new() { Code = "POWER", Name = "Power Monitoring", Topic = "utility/power/+/telemetry", Qos = 1, Enabled = true },
+        new() { Code = "WATER", Name = "Water Monitoring", Topic = "utility/water/+/telemetry", Qos = 1, Enabled = true },
+        new() { Code = "AIR", Name = "Compressed Air", Topic = "utility/compressed-air/+/telemetry", Qos = 1, Enabled = true },
+        new() { Code = "TILT", Name = "Tilt Sensor", Topic = "utility/tilt01/raw", Qos = 1, Enabled = true },
+        new() { Code = "VW", Name = "Vibrating Wire Sensor", Topic = "utility/vw01/raw", Qos = 1, Enabled = true },
+        new() { Code = "ATRH", Name = "Air Temperature & RH Sensor", Topic = "utility/atrh01/raw", Qos = 1, Enabled = true },
+        new() { Code = "ACC", Name = "Accelerometer Sensor", Topic = "utility/acc03/raw", Qos = 1, Enabled = true }
     ];
 
     private readonly IMqttConfigurationRepository _repository;
@@ -40,14 +43,15 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
     {
         await _repository.EnsureTableAsync(cancellationToken);
         var existing = await _repository.GetTopicsAsync(cancellationToken);
-        var missingDefaults = DefaultTopics
-            .Where(defaultTopic => existing.All(item => item.Code != defaultTopic.Code))
-            .Select(Clone)
+        var defaultUpdates = DefaultTopics
+            .Select(defaultTopic => BuildDefaultUpdate(defaultTopic, existing.FirstOrDefault(item => item.Code == defaultTopic.Code)))
+            .Where(topic => topic is not null)
+            .Select(topic => topic!)
             .ToList();
 
-        if (missingDefaults.Count > 0)
+        if (defaultUpdates.Count > 0)
         {
-            await _repository.UpsertTopicsAsync(missingDefaults, cancellationToken);
+            await _repository.UpsertTopicsAsync(defaultUpdates, cancellationToken);
         }
     }
 
@@ -56,7 +60,7 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
         {
             BrokerHost = "127.0.0.1",
             BrokerPort = 1883.ToString(CultureInfo.InvariantCulture),
-            ClientId = "SHMSClient",
+            ClientId = "UtilityClient",
             Topics = topics.ToList()
         };
 
@@ -70,7 +74,7 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
         return DefaultTopics.Select(defaultTopic =>
         {
             requested.TryGetValue(defaultTopic.Code, out var topic);
-            var normalizedTopic = topic?.Topic?.Trim();
+            var normalizedTopic = NormalizeTopic(topic?.Topic);
 
             return new MqttSensorTopicConfig
             {
@@ -93,9 +97,53 @@ public sealed class MqttConfigurationService : IMqttConfigurationService
             Enabled = source.Enabled
         };
 
+    private static MqttSensorTopicConfig? BuildDefaultUpdate(MqttSensorTopicConfig defaultTopic, MqttSensorTopicConfig? existing)
+    {
+        if (existing is null)
+        {
+            return Clone(defaultTopic);
+        }
+
+        if (!IsLegacyDefaultTopic(existing))
+        {
+            return null;
+        }
+
+        return new MqttSensorTopicConfig
+        {
+            Code = defaultTopic.Code,
+            Name = string.IsNullOrWhiteSpace(existing.Name) ? defaultTopic.Name : existing.Name,
+            Topic = defaultTopic.Topic,
+            Qos = Math.Clamp(existing.Qos, 0, 2),
+            Enabled = existing.Enabled
+        };
+    }
+
+    private static bool IsLegacyDefaultTopic(MqttSensorTopicConfig topic) =>
+        (topic.Code.Trim().ToUpperInvariant(), NormalizeTopic(topic.Topic)) switch
+        {
+            ("TILT", "utility/tilt") => true,
+            ("VW", "utility/vw") => true,
+            ("ATRH", "utility/atrh") => true,
+            ("ACC", "utility/acc") => true,
+            _ => false
+        };
+
     private static string TrimTo(string value, int maxLength)
     {
         var trimmed = value.Trim();
         return trimmed.Length <= maxLength ? trimmed : trimmed[..maxLength];
+    }
+
+    private static string NormalizeTopic(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return string.Join(
+            '/',
+            value.Trim().Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 }

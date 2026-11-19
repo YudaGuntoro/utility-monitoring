@@ -14,10 +14,10 @@ CREATE TABLE IF NOT EXISTS mqtt_sensor_topics (
 INSERT INTO mqtt_sensor_topics
     (code, name, topic, qos, enabled)
 VALUES
-    ('TILT', 'Tilt Sensor', 'shms/tilt', 1, 1),
-    ('VW', 'Vibrating Wire Sensor', 'shms/vw', 1, 1),
-    ('ATRH', 'Air Temperature & RH Sensor', 'shms/atrh', 1, 1),
-    ('ACC', 'Accelerometer Sensor', 'shms/acc', 1, 1)
+    ('TILT', 'Tilt Sensor', 'utility/tilt', 1, 1),
+    ('VW', 'Vibrating Wire Sensor', 'utility/vw', 1, 1),
+    ('ATRH', 'Air Temperature & RH Sensor', 'utility/atrh', 1, 1),
+    ('ACC', 'Accelerometer Sensor', 'utility/acc', 1, 1)
 ON DUPLICATE KEY UPDATE
     name = VALUES(name),
     topic = VALUES(topic),

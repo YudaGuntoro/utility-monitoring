@@ -6,5 +6,5 @@ public interface ISensorReadingWriterService
 {
     Task WaitUntilReadyAsync(CancellationToken cancellationToken = default);
 
-    Task<long> InsertAsync(ShmsSensorReading reading, CancellationToken cancellationToken = default);
+    Task<long> InsertAsync(UtilitySensorReading reading, CancellationToken cancellationToken = default);
 }

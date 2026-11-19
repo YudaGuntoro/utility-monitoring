@@ -1,5 +1,5 @@
-export const API_ACTIVITY_EVENT = "shms-system:api-activity";
-export const API_ACTIVITY_STORAGE_KEY = "shms-system:last-api-at";
+export const API_ACTIVITY_EVENT = "utility-system:api-activity";
+export const API_ACTIVITY_STORAGE_KEY = "utility-system:last-api-at";
 
 export type ApiActivityEventDetail = {
   at: string;

@@ -15,7 +15,7 @@ public sealed class RedisMqttMessageBuffer : IRedisMqttMessageBuffer
     {
         _logger = logger;
         var connectionString = ReadSetting("ConnectionString", "Redis", "REDIS_CONNECTION_STRING") ?? "localhost:6379";
-        _bufferKey = ReadSetting("BufferKey", "Redis", "REDIS_BUFFER_KEY") ?? "shms:mqtt:buffer";
+        _bufferKey = ReadSetting("BufferKey", "Redis", "REDIS_BUFFER_KEY") ?? "utility:mqtt:buffer";
         _redis = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(connectionString));
     }
 

@@ -1,6 +1,6 @@
 namespace Worker.Application.Handlers;
 
-public interface IShmsSensorHandler
+public interface IUtilitySensorHandler
 {
     bool CanHandle(string topic);
 

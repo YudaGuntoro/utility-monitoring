@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using Web.API.Domain.Production;
 using Web.API.Persistence.Context;
 using Web.API.Persistence.Services.Production;
@@ -8,13 +9,13 @@ using Web.API.Persistence.Services.Production;
 namespace Web.API.Controllers;
 
 [ApiController]
-[Route("api/shms-system")]
-public class SHMSSystemController : ApiControllerBase
+[Route("api/utility-system")]
+public class UtilitySystemController : ApiControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IMqttConfigurationService _mqttConfigurationService;
 
-    public SHMSSystemController(
+    public UtilitySystemController(
         AppDbContext db,
         IMqttConfigurationService mqttConfigurationService)
     {
@@ -60,6 +61,7 @@ public class SHMSSystemController : ApiControllerBase
             settings.BackupSchedule = string.IsNullOrWhiteSpace(request.BackupSchedule) ? "daily" : request.BackupSchedule.Trim();
             settings.PlcIpAddress = request.PlcIpAddress;
             settings.ElectricityRatePerKwh = Math.Max(0, request.ElectricityRatePerKwh);
+            ApplyLogo(settings, request.LogoDataUrl);
             settings.UpdatedAt = DateTime.Now;
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -197,7 +199,10 @@ public class SHMSSystemController : ApiControllerBase
             BackupDbLocation = settings?.BackupDbLocation ?? string.Empty,
             BackupSchedule = settings?.BackupSchedule ?? "daily",
             PlcIpAddress = settings?.PlcIpAddress ?? string.Empty,
-            ElectricityRatePerKwh = settings?.ElectricityRatePerKwh ?? 0
+            ElectricityRatePerKwh = settings?.ElectricityRatePerKwh ?? 0,
+            LogoDataUrl = settings?.LogoData is { Length: > 0 } data && !string.IsNullOrWhiteSpace(settings.LogoMimeType)
+                ? $"data:{settings.LogoMimeType};base64,{Convert.ToBase64String(data)}"
+                : null
         };
     }
 
@@ -242,6 +247,8 @@ CREATE TABLE IF NOT EXISTS system_settings (
     backup_schedule VARCHAR(20) NOT NULL DEFAULT 'daily',
     plc_ip_address VARCHAR(80) NULL,
     electricity_rate_per_kwh DECIMAL(18,2) NOT NULL DEFAULT 0,
+    logo_data LONGBLOB NULL,
+    logo_mime_type VARCHAR(50) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_system_settings_pressure_unit
@@ -290,6 +297,37 @@ SET @add_electricity_rate_sql := IF(
 PREPARE add_electricity_rate_statement FROM @add_electricity_rate_sql;
 EXECUTE add_electricity_rate_statement;
 DEALLOCATE PREPARE add_electricity_rate_statement;", cancellationToken);
+
+        await _db.Database.ExecuteSqlRawAsync(@"
+SET @logo_data_exists := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'system_settings' AND COLUMN_NAME = 'logo_data');
+SET @add_logo_data_sql := IF(@logo_data_exists = 0, 'ALTER TABLE system_settings ADD COLUMN logo_data LONGBLOB NULL AFTER electricity_rate_per_kwh', 'SELECT 1');
+PREPARE add_logo_data_statement FROM @add_logo_data_sql;
+EXECUTE add_logo_data_statement;
+DEALLOCATE PREPARE add_logo_data_statement;
+SET @logo_mime_exists := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'system_settings' AND COLUMN_NAME = 'logo_mime_type');
+SET @add_logo_mime_sql := IF(@logo_mime_exists = 0, 'ALTER TABLE system_settings ADD COLUMN logo_mime_type VARCHAR(50) NULL AFTER logo_data', 'SELECT 1');
+PREPARE add_logo_mime_statement FROM @add_logo_mime_sql;
+EXECUTE add_logo_mime_statement;
+DEALLOCATE PREPARE add_logo_mime_statement;", cancellationToken);
+    }
+
+    private static void ApplyLogo(SystemSetting settings, string? dataUrl)
+    {
+        if (string.IsNullOrWhiteSpace(dataUrl))
+        {
+            settings.LogoData = null;
+            settings.LogoMimeType = null;
+            return;
+        }
+
+        var match = Regex.Match(dataUrl, @"^data:(image/(?:png|jpeg|webp|gif));base64,(.+)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        if (!match.Success) throw new InvalidOperationException("Logo must be a PNG, JPEG, WEBP, or GIF image.");
+        byte[] bytes;
+        try { bytes = Convert.FromBase64String(match.Groups[2].Value); }
+        catch (FormatException) { throw new InvalidOperationException("Logo image data is invalid."); }
+        if (bytes.Length == 0 || bytes.Length > 1024 * 1024) throw new InvalidOperationException("Logo image must be 1 MB or smaller.");
+        settings.LogoData = bytes;
+        settings.LogoMimeType = match.Groups[1].Value.ToLowerInvariant();
     }
 
     private async Task<MeasurementUnit> EnsureMeasurementUnitAsync(

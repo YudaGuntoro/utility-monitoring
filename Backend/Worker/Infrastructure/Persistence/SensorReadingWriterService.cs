@@ -4,6 +4,7 @@ using MySql.Data.MySqlClient;
 using Worker.Domain.Models;
 using Worker.Shared;
 using Worker.Configuration;
+using Web.API.Persistence.Licensing;
 
 namespace Worker.Infrastructure.Persistence;
 
@@ -23,15 +24,20 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
         await EnsureTablesAsync(connection, cancellationToken);
     }
 
-    public async Task<long> InsertAsync(ShmsSensorReading reading, CancellationToken cancellationToken = default)
+    public async Task<long> InsertAsync(UtilitySensorReading reading, CancellationToken cancellationToken = default)
     {
         await using var connection = new MySqlConnection(DatabaseConfig.MysqlConnString);
         await DbRetry.OpenWithRetryAsync(connection, _logger, "SensorReadings", cancellationToken);
         await EnsureTablesAsync(connection, cancellationToken);
 
+        await using var license = await DeviceLicense.AcquireAsync(DatabaseConfig.MysqlConnString, cancellationToken);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
+            var exists = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+                "SELECT COUNT(*) FROM sensor_devices WHERE device_code = @deviceCode",
+                new { deviceCode = Clamp(reading.DeviceCode, 80) }, transaction, cancellationToken: cancellationToken));
+            if (exists == 0) await license.EnsureCanAddAsync(cancellationToken);
             var unitId = await ResolveUnitIdAsync(connection, transaction, reading, cancellationToken);
             var sensorTypeId = await ResolveSensorTypeIdAsync(connection, transaction, reading, unitId, cancellationToken);
             var deviceId = await ResolveSensorDeviceIdAsync(connection, transaction, reading, sensorTypeId, cancellationToken);
@@ -76,7 +82,7 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
     private static async Task<int> ResolveUnitIdAsync(
         MySqlConnection connection,
         MySqlTransaction transaction,
-        ShmsSensorReading reading,
+        UtilitySensorReading reading,
         CancellationToken cancellationToken)
     {
         const string sql = """
@@ -100,7 +106,7 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
     private static async Task<int> ResolveSensorTypeIdAsync(
         MySqlConnection connection,
         MySqlTransaction transaction,
-        ShmsSensorReading reading,
+        UtilitySensorReading reading,
         int unitId,
         CancellationToken cancellationToken)
     {
@@ -130,7 +136,7 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
     private static async Task<long> ResolveSensorDeviceIdAsync(
         MySqlConnection connection,
         MySqlTransaction transaction,
-        ShmsSensorReading reading,
+        UtilitySensorReading reading,
         int sensorTypeId,
         CancellationToken cancellationToken)
     {
@@ -159,7 +165,7 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
     private static async Task<long> ResolveSensorChannelIdAsync(
         MySqlConnection connection,
         MySqlTransaction transaction,
-        ShmsSensorReading reading,
+        UtilitySensorReading reading,
         long deviceId,
         int unitId,
         CancellationToken cancellationToken)
@@ -205,17 +211,17 @@ public sealed class SensorReadingWriterService : ISensorReadingWriterService
                 UNIQUE KEY uq_measurement_units_category_symbol (unit_category, unit_symbol)
             ) ENGINE=InnoDB;
 
-            CREATE TABLE IF NOT EXISTS shms_sites (
+            CREATE TABLE IF NOT EXISTS utility_sites (
                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 site_code VARCHAR(50) NOT NULL,
                 site_name VARCHAR(150) NOT NULL,
                 is_active TINYINT(1) NOT NULL DEFAULT 1,
                 created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
                 updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-                UNIQUE KEY uq_shms_sites_site_code (site_code)
+                UNIQUE KEY uq_utility_sites_site_code (site_code)
             ) ENGINE=InnoDB;
 
-            INSERT INTO shms_sites (id, site_code, site_name, is_active)
+            INSERT INTO utility_sites (id, site_code, site_name, is_active)
             VALUES (1, 'BTU-SITE-001', 'Baja Titian Utama Monitoring Site', 1)
             ON DUPLICATE KEY UPDATE site_name = VALUES(site_name), is_active = VALUES(is_active);
 

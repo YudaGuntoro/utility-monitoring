@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS system_settings (
     backup_schedule VARCHAR(20) NOT NULL DEFAULT 'daily',
     plc_ip_address VARCHAR(80) NULL,
     electricity_rate_per_kwh DECIMAL(18,2) NOT NULL DEFAULT 0,
+    logo_data LONGBLOB NULL,
+    logo_mime_type VARCHAR(50) NULL,
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT fk_system_settings_pressure_unit FOREIGN KEY (pressure_unit_id) REFERENCES measurement_units (id)
@@ -71,7 +73,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
     CONSTRAINT ck_system_settings_backup_schedule CHECK (backup_schedule IN ('manual', 'hourly', 'daily', 'weekly', 'monthly'))
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS shms_sites (
+CREATE TABLE IF NOT EXISTS utility_sites (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     site_code VARCHAR(50) NOT NULL,
     site_name VARCHAR(150) NOT NULL,
@@ -86,9 +88,9 @@ CREATE TABLE IF NOT EXISTS shms_sites (
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    UNIQUE KEY uq_shms_sites_site_code (site_code),
-    KEY ix_shms_sites_location (latitude, longitude),
-    CONSTRAINT ck_shms_sites_is_active CHECK (is_active IN (0, 1))
+    UNIQUE KEY uq_utility_sites_site_code (site_code),
+    KEY ix_utility_sites_location (latitude, longitude),
+    CONSTRAINT ck_utility_sites_is_active CHECK (is_active IN (0, 1))
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS structural_assets (
@@ -105,7 +107,7 @@ CREATE TABLE IF NOT EXISTS structural_assets (
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_structural_assets_site_asset_code (site_id, asset_code),
     KEY ix_structural_assets_site_id (site_id),
-    CONSTRAINT fk_structural_assets_site FOREIGN KEY (site_id) REFERENCES shms_sites (id)
+    CONSTRAINT fk_structural_assets_site FOREIGN KEY (site_id) REFERENCES utility_sites (id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
     CONSTRAINT ck_structural_assets_is_active CHECK (is_active IN (0, 1)),
@@ -169,7 +171,7 @@ CREATE TABLE IF NOT EXISTS sensor_devices (
     KEY ix_sensor_devices_zone_id (zone_id),
     KEY ix_sensor_devices_sensor_type_id (sensor_type_id),
     KEY ix_sensor_devices_status (status),
-    CONSTRAINT fk_sensor_devices_site FOREIGN KEY (site_id) REFERENCES shms_sites (id)
+    CONSTRAINT fk_sensor_devices_site FOREIGN KEY (site_id) REFERENCES utility_sites (id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
     CONSTRAINT fk_sensor_devices_asset FOREIGN KEY (asset_id) REFERENCES structural_assets (id)
@@ -357,4 +359,43 @@ CREATE TABLE IF NOT EXISTS server_sync_status (
     CONSTRAINT ck_server_sync_status_is_online CHECK (is_online IN (0, 1)),
     CONSTRAINT ck_server_sync_status_redis_count CHECK (redis_buffer_count >= 0),
     CONSTRAINT ck_server_sync_status_spillover_count CHECK (db_spillover_count >= 0)
+) ENGINE=InnoDB;
+
+-- Utility catalog: meter types are stored once and referenced by each meter.
+CREATE TABLE IF NOT EXISTS utility_types (
+    code VARCHAR(20) NOT NULL PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    UNIQUE KEY uq_utility_types_name (name)
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO utility_types (code, name)
+VALUES ('water', 'Water'), ('compressed-air', 'Compressed Air');
+
+CREATE TABLE IF NOT EXISTS utility_devices (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    kind VARCHAR(20) NOT NULL,
+    device_code VARCHAR(50) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    location VARCHAR(150) NOT NULL DEFAULT '',
+    enabled TINYINT(1) NOT NULL DEFAULT 1,
+    low_pressure_bar DECIMAL(20,6) NULL,
+    high_flow_rate DECIMAL(20,6) NULL,
+    UNIQUE KEY uq_utility_kind_code (kind, device_code),
+    CONSTRAINT fk_utility_devices_type FOREIGN KEY (kind) REFERENCES utility_types (code)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS utility_readings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id BIGINT NOT NULL,
+    timestamp DATETIME(6) NOT NULL,
+    received_at DATETIME(6) NOT NULL,
+    flow_rate DECIMAL(20,6) NOT NULL,
+    total_volume DECIMAL(20,6) NOT NULL,
+    pressure_bar DECIMAL(20,6) NULL,
+    temperature_c DECIMAL(20,6) NULL,
+    power_kw DECIMAL(20,6) NULL,
+    UNIQUE KEY uq_utility_device_timestamp (device_id, timestamp),
+    CONSTRAINT fk_utility_readings_device FOREIGN KEY (device_id) REFERENCES utility_devices (id)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;

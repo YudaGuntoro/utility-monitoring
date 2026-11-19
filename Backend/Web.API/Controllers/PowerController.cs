@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web.API.Domain.Production;
 using Web.API.Persistence.Context;
+using Web.API.Persistence.Licensing;
 
 namespace Web.API.Controllers;
 
@@ -57,6 +58,7 @@ public class PowerController : ApiControllerBase
         try
         {
             await EnsurePowerSchemaAsync(cancellationToken);
+            await using var license = await DeviceLicense.AcquireAsync(_db.Database.GetConnectionString()!, cancellationToken);
             var deviceCode = NormalizeDeviceCode(request.DeviceCode);
             if (string.IsNullOrWhiteSpace(deviceCode))
             {
@@ -68,6 +70,8 @@ public class PowerController : ApiControllerBase
             {
                 throw new InvalidOperationException($"Device Code {deviceCode} already exists.");
             }
+
+            await license.EnsureCanAddAsync(cancellationToken);
 
             var now = DateTime.Now;
             var device = new PowerDevice
@@ -466,15 +470,5 @@ CREATE TABLE IF NOT EXISTS power_telemetry_history (
     CONSTRAINT fk_power_history_device FOREIGN KEY (device_id) REFERENCES power_devices(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO power_devices (device_code, name, model, location, gateway_id, mqtt_topic, status, enabled)
-SELECT seed.device_code, seed.name, seed.model, seed.location, seed.gateway_id, seed.mqtt_topic, seed.status, seed.enabled
-FROM (
-    SELECT 'PM-01' device_code, 'Main Panel 01' name, 'Schneider PM8000 / PM8240' model, 'Electrical Room' location, 'GW-01' gateway_id, 'utility/power/PM-01/telemetry' mqtt_topic, 'offline' status, 1 enabled
-    UNION ALL SELECT 'PM-02', 'Main Panel 02', 'Schneider PM8000 / PM8240', 'Electrical Room', 'GW-01', 'utility/power/PM-02/telemetry', 'offline', 1
-    UNION ALL SELECT 'PM-03', 'Main Panel 03', 'Schneider PM8000 / PM8240', 'Electrical Room', 'GW-01', 'utility/power/PM-03/telemetry', 'offline', 1
-    UNION ALL SELECT 'PM-04', 'Main Panel 04', 'Schneider PM8000 / PM8240', 'Electrical Room', 'GW-01', 'utility/power/PM-04/telemetry', 'offline', 1
-    UNION ALL SELECT 'PM-05', 'Main Panel 05', 'Schneider PM8000 / PM8240', 'Electrical Room', 'GW-01', 'utility/power/PM-05/telemetry', 'offline', 1
-) seed
-WHERE NOT EXISTS (SELECT 1 FROM power_devices);
 """;
 }

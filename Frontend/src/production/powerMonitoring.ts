@@ -312,12 +312,7 @@ export const powerApi = {
   usageSummary: (id: number | string) =>
     isDummyId(id) ? Promise.resolve(dummyUsageSummary(id)) : apiGet<PowerUsageSummary>(`/api/power/devices/${id}/usage-summary`),
   createDevice: async (input: PowerDeviceInput) => {
-    try {
-      return await apiPost<PowerDevice>("/api/power/devices", input);
-    } catch (error) {
-      if (!shouldUseLocalFallback(error)) throw error;
-      return upsertLocalDemoDevice(input);
-    }
+    return apiPost<PowerDevice>("/api/power/devices", input);
   },
   updateDevice: async (id: number, input: PowerDeviceInput) => {
     if (isDummyId(id)) return upsertLocalDemoDevice(input, id);

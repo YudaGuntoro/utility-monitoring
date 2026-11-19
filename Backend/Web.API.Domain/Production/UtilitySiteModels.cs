@@ -49,6 +49,11 @@ public class SystemSetting
     [JsonPropertyName("electricity_rate_per_kwh")]
     public decimal ElectricityRatePerKwh { get; set; }
 
+    [JsonPropertyName("logo_data")]
+    public byte[]? LogoData { get; set; }
+    [JsonPropertyName("logo_mime_type")]
+    public string? LogoMimeType { get; set; }
+
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
@@ -81,6 +86,8 @@ public class SystemSettingsResponse
 
     [JsonPropertyName("electricity_rate_per_kwh")]
     public decimal ElectricityRatePerKwh { get; set; }
+    [JsonPropertyName("logo_data_url")]
+    public string? LogoDataUrl { get; set; }
 }
 
 public class UpdateSystemSettingsRequest
@@ -102,6 +109,8 @@ public class UpdateSystemSettingsRequest
 
     [JsonPropertyName("electricity_rate_per_kwh")]
     public decimal ElectricityRatePerKwh { get; set; }
+    [JsonPropertyName("logo_data_url")]
+    public string? LogoDataUrl { get; set; }
 }
 
 public class MqttSensorTopicConfig
@@ -134,7 +143,7 @@ public class MqttSensorTopicConfig
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
-public class ShmsSite
+public class UtilitySite
 {
     public long Id { get; set; }
     public string SiteCode { get; set; } = string.Empty;
@@ -246,7 +255,7 @@ public class MqttBrokerConfig
     public string ConfigName { get; set; } = "default";
     public string Host { get; set; } = "127.0.0.1";
     public int Port { get; set; } = 1883;
-    public string ClientId { get; set; } = "SHMSClient";
+    public string ClientId { get; set; } = "UtilityClient";
     public string? Username { get; set; }
     public string? PasswordSecretName { get; set; }
     public bool UseTls { get; set; }
@@ -308,7 +317,7 @@ public class MqttConfigurationResponse
     public string BrokerPort { get; set; } = "1883";
 
     [JsonPropertyName("client_id")]
-    public string ClientId { get; set; } = "SHMSClient";
+    public string ClientId { get; set; } = "UtilityClient";
 
     [JsonPropertyName("topics")]
     public List<MqttSensorTopicConfig> Topics { get; set; } = [];

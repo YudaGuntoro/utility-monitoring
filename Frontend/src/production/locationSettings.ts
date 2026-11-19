@@ -7,7 +7,7 @@ export type BridgeLocationSettings = {
   zoom: number;
 };
 
-export const BRIDGE_LOCATION_STORAGE_KEY = "shms-bridge-location";
+export const BRIDGE_LOCATION_STORAGE_KEY = "utility-bridge-location";
 
 export const defaultBridgeLocationSettings: BridgeLocationSettings = {
   area: "",

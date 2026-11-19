@@ -8,7 +8,7 @@ namespace Worker.Infrastructure.Http;
 
 public sealed class MainServerUploader : IMainServerUploader, IDisposable
 {
-    private const string TopicHeaderName = "X-SHMS-MQTT-Topic";
+    private const string TopicHeaderName = "X-Utility-MQTT-Topic";
 
     private readonly RestClient? _client;
     private readonly ILogger<MainServerUploader> _logger;

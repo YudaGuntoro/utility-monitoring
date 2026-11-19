@@ -7,7 +7,7 @@ import {
   type ApiActivityEventDetail,
 } from "@/lib/api-activity";
 
-type SHMSStatus = {
+type UtilityStatus = {
   last_mqtt_at?: string | null;
   server_time?: string;
 };
@@ -63,7 +63,7 @@ export default function MqttStatus() {
 
     const loadStatus = async () => {
       try {
-        const status = await apiGet<SHMSStatus>("/api/shms-system/status");
+        const status = await apiGet<UtilityStatus>("/api/utility-system/status");
         if (!ignore) {
           setLastMqttAt(status.last_mqtt_at ?? null);
         }
@@ -92,7 +92,7 @@ export default function MqttStatus() {
 
     const loadMqttBrokerStatus = async () => {
       try {
-        const status = await apiGet<MqttBrokerStatus>("/api/shms-system/mqtt-broker/status");
+        const status = await apiGet<MqttBrokerStatus>("/api/utility-system/mqtt-broker/status");
         if (!ignore) {
           setMqttBrokerOnline(Boolean(status.configured && status.online));
         }

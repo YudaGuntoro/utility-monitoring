@@ -4,8 +4,7 @@ import dynamic from "next/dynamic";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApexOptions } from "apexcharts";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { useTheme } from "@/context/ThemeContext";
+import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 import { formatNumber, powerApi, type PowerDevice, type PowerTelemetry, type PowerUsageSummary } from "./powerMonitoring";
 import { fetchSystemSettings, readSystemSettings } from "./settings";
@@ -22,7 +21,6 @@ const ranges = [
 ];
 
 export default function PowerDeviceDetailPage({ id }: { id: string }) {
-  const { theme } = useTheme();
   const toast = useToast();
   const [device, setDevice] = useState<PowerDevice | null>(null);
   const [history, setHistory] = useState<PowerTelemetry[]>([]);
@@ -48,13 +46,16 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
   }, [hours, id, toast]);
 
   useEffect(() => {
-    void load();
-    const timer = window.setInterval(() => {
+    const initialLoad = window.setTimeout(() => void load(), 0);
+    const refreshTimer = window.setInterval(() => {
       if (!document.hidden) {
         void load();
       }
     }, DEVICE_DETAIL_REFRESH_MS);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(refreshTimer);
+    };
   }, [load]);
 
   useEffect(() => {
@@ -73,10 +74,12 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
   const chart = useMemo(() => {
     const categories = history.map((row) => new Date(row.timestamp).toLocaleTimeString());
     const options: ApexOptions = {
-      chart: { fontFamily: "Outfit, sans-serif", toolbar: { show: false }, type: "line" },
-      colors: ["#2563eb", "#0f766e", "#f59e0b", "#ef4444"],
+      chart: { fontFamily: "Outfit, sans-serif", toolbar: { show: false }, type: "line", redrawOnParentResize: true, redrawOnWindowResize: true },
+      colors: ["#465fff", "#82a9ff", "#0d9488", "#f59e0b", "#1d4f8f", "#06a6c5", "#64748b", "#e76c57"],
       dataLabels: { enabled: false },
-      grid: { borderColor: theme === "dark" ? "#1e293b" : "#e2e8f0", strokeDashArray: 3 },
+      grid: { borderColor: "#edf0f5", strokeDashArray: 3 },
+      theme: { mode: "light" },
+      tooltip: { theme: "light" },
       stroke: { curve: "smooth", width: 2 },
       xaxis: { categories, labels: { rotate: -30 } },
       yaxis: { decimalsInFloat: 2 },
@@ -94,15 +97,13 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
         { name: "Power Factor", data: history.map((row) => row.power_factor ?? null) },
       ],
     };
-  }, [history, theme]);
+  }, [history]);
 
   return (
     <div className="space-y-6">
-      <PageBreadcrumb pageTitle={device?.name ?? "Energy Meter"} parentTitle="Data Monitor" />
-
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <header data-utility-header>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Power Monitoring</p>
+          <Link data-utility-eyebrow href="/power-monitoring">Power Monitoring / Device detail</Link>
           <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{device?.name ?? "Energy Meter"}</h1>
           <p className="mt-2 text-sm font-semibold text-slate-500">
             {device?.device_code ?? "-"} · {device?.model ?? "-"} · {device?.location ?? "-"} · {device?.gateway_id ?? "-"}
@@ -175,8 +176,8 @@ export default function PowerDeviceDetailPage({ id }: { id: string }) {
             ))}
           </div>
         </div>
-        <div className="mt-5 min-h-[320px]">
-          <ReactApexChart height={320} options={chart.options} series={chart.series} type="line" />
+        <div className="mt-5 min-h-[320px] min-w-0 overflow-hidden">
+          <ReactApexChart height={320} width="100%" options={chart.options} series={chart.series} type="line" />
         </div>
       </section>
     </div>

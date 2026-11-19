@@ -4,17 +4,18 @@ import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastProvider } from '@/context/ToastContext';
+import BrowserIcon from '@/components/brand/BrowserIcon';
 
 export const metadata: Metadata = {
   title: {
-    default: "Energy Monitoring System",
-    template: "%s | Energy Monitoring System",
+    default: "Utility Monitoring System",
+    template: "%s | Utility Monitoring System",
   },
-  description: "Energy Monitoring System dashboard",
+  description: "Utility Monitoring System dashboard",
   icons: {
-    apple: "/shms-icon.svg?v=btu-shms-2",
-    icon: "/shms-icon.svg?v=btu-shms-2",
-    shortcut: "/shms-icon.svg?v=btu-shms-2",
+    apple: "/utility-icon.svg?v=utility-system",
+    icon: "/utility-icon.svg?v=utility-system",
+    shortcut: "/utility-icon.svg?v=utility-system",
   },
 };
 
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-outfit dark:bg-gray-900">
+        <BrowserIcon />
         <ThemeProvider>
           <ToastProvider>
             <SidebarProvider>{children}</SidebarProvider>

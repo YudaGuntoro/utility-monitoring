@@ -90,7 +90,7 @@ public sealed class LogWriterService : ILogWriterService
         {
             if (text.Contains(sensorCode, StringComparison.Ordinal))
             {
-                return $"SHMS-{sensorCode}-01";
+                return $"Utility-{sensorCode}-01";
             }
         }
 

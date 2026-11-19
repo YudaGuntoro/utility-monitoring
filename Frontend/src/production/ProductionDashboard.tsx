@@ -1,8 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { useToast } from "@/context/ToastContext";
 import { formatNumber, powerApi, type PowerDashboard, type PowerDevice } from "./powerMonitoring";
 
@@ -42,12 +41,12 @@ function SummaryCard({
   unit?: string;
 }) {
   const accentClass = {
-    amber: "bg-amber-400",
-    blue: "bg-blue-500",
-    cyan: "bg-cyan-400",
-    emerald: "bg-emerald-400",
-    red: "bg-red-500",
-    violet: "bg-violet-400",
+    amber: "#ffb000",
+    blue: "#2f80ed",
+    cyan: "#00aeef",
+    emerald: "#00b882",
+    red: "#f04438",
+    violet: "#465fff",
   }[accent];
   const statusClass = {
     offline: "border-red-500/25 bg-red-50 text-red-700",
@@ -63,7 +62,7 @@ function SummaryCard({
   }[status ?? "waiting"];
 
   return (
-    <section className={`rounded-lg ${accentClass} p-px shadow-sm shadow-slate-200/70`}>
+    <section className="rounded-lg border border-slate-200 bg-white shadow-sm" style={{ borderTop: `4px solid ${accentClass}` }}>
       <div className="h-full rounded-[7px] bg-white p-5">
         <div className="flex items-start justify-between gap-3">
           <p className="text-sm font-extrabold text-slate-800">{label}</p>
@@ -171,12 +170,10 @@ export default function ProductionDashboard() {
 
   return (
     <div className="power-monitoring-light-surface space-y-6 text-slate-900">
-      <PageBreadcrumb pageTitle="Power Monitoring" />
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <header data-utility-header>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Energy Monitoring System</p>
-          <h1 className="mt-2 text-2xl font-black text-slate-900">Energy Monitoring System</h1>
+          <p data-utility-eyebrow>Utility Monitoring System</p>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Power Monitoring</h1>
         </div>
         <div className="flex gap-3">
           <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50" href="/devices">
@@ -186,7 +183,7 @@ export default function ProductionDashboard() {
             {loading ? "Refreshing" : "Refresh"}
           </button>
         </div>
-      </div>
+      </header>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <SummaryCard accent="blue" label="Total Devices" note="Registered power meters" status="waiting" value={summary?.total_devices ?? 0} />

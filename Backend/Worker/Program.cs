@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Web.API.Persistence.Context;
 using Worker.Application.Handlers;
+using Worker.Configuration;
 using Worker.Infrastructure.Http;
 using Worker.Infrastructure.Logging;
 using Worker.Infrastructure.Mqtt;
@@ -15,13 +18,16 @@ builder.Services.AddWindowsService(options =>
 
 builder.Logging.AddProvider(new FileLoggerProvider(logDirectory));
 
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseMySql(DatabaseConfig.MysqlConnString, ServerVersion.AutoDetect(DatabaseConfig.MysqlConnString)));
 builder.Services.AddSingleton<MqttTopicConfigService>();
 builder.Services.AddSingleton<ILogWriterService, LogWriterService>();
 builder.Services.AddSingleton<ISensorReadingWriterService, SensorReadingWriterService>();
 builder.Services.AddSingleton<IPowerTelemetryWriterService, PowerTelemetryWriterService>();
+builder.Services.AddSingleton<UtilityTelemetryWriter>();
 builder.Services.AddSingleton<ISyncStatusWriterService, SyncStatusWriterService>();
 builder.Services.AddSingleton<IMainServerUploader, MainServerUploader>();
-builder.Services.AddSingleton<IShmsSensorHandler, ShmsSensorHandler>();
+builder.Services.AddSingleton<IUtilitySensorHandler, UtilitySensorHandler>();
 builder.Services.AddSingleton<IRedisMqttMessageBuffer, RedisMqttMessageBuffer>();
 builder.Services.AddSingleton<IMqttMessageHandler, MqttMessageRouter>();
 builder.Services.AddSingleton<MqttClientService>();
@@ -33,6 +39,6 @@ builder.Services.AddHostedService<PowerDummyPublisherService>();
 var host = builder.Build();
 host.Services.GetRequiredService<ILoggerFactory>()
     .CreateLogger("Worker.Startup")
-    .LogInformation("SHMS Worker starting. LogDirectory={LogDirectory}", logDirectory);
+    .LogInformation("Utility Worker starting. LogDirectory={LogDirectory}", logDirectory);
 
 host.Run();

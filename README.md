@@ -1,6 +1,10 @@
-# Utility Monitoring
+# Utility Monitoring System
 
-Power Monitoring phase for Utility Monitoring. The app consumes normalized MQTT telemetry from a gateway, stores latest and historical readings in MySQL, and renders a dynamic dashboard for registered power meters.
+Water and compressed air modules are available alongside Power Monitoring. See [utility monitoring setup and MQTT payloads](docs/UTILITY_MONITORING.md).
+
+For eight demo meters with seven days of history and live updates, see [demo data](docs/DEMO_DATA.md).
+
+Utility Monitoring System monitors electricity, water, and compressed air. The app consumes MQTT telemetry from gateways, stores readings in MySQL, and provides dashboards, history, and configurable flow and pressure alarms.
 
 ## Architecture
 
@@ -29,10 +33,14 @@ Password: root_native
 Use database `utility-system`. From the repository root, run:
 
 ```powershell
-mysql -u root -p -e "source Backend/database/bajatitian-shms.sql"
+mysql -u root -p -e "source Backend/database/utility-system.sql"
 ```
 
-The script creates the auth tables, power tables, and seeds `PM-01` through `PM-05`. The API and worker also create the power tables and seed devices at startup if missing.
+The script creates the normalized auth and utility catalog tables, plus power tables and `PM-01` through `PM-05`. Utility meter types live in `utility_types`; meters reference that catalog, and readings reference meters.
+
+For an existing database, apply `Backend/database/migrations/20261018_001_utility_type_catalog.sql` after confirming meter kinds are `water` or `compressed-air`.
+
+Application logo uploads are stored in `system_settings` and limited to 1 MB. Existing databases should also apply `Backend/database/migrations/20261018_002_system_logo.sql`.
 
 ## Run Locally
 
@@ -83,7 +91,7 @@ The simulator publishes `PM-01` through `PM-05` to `utility/power/{deviceCode}/t
 - `GET|POST /api/power/devices`
 - `GET|PUT|DELETE /api/power/devices/{id}`
 - `GET /api/power/devices/{id}/history?start=...&end=...`
-- `GET /api/shms-system/mqtt-broker/status`
+- `GET /api/utilities/{kind}/devices`
 
 ## Add PM-06
 

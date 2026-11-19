@@ -2,8 +2,8 @@
 SETLOCAL EnableExtensions EnableDelayedExpansion
 
 SET "SERVICE_NAME=Worker"
-SET "DISPLAY_NAME=SHMS Worker"
-SET "SERVICE_DESCRIPTION=PT. Baja Titian Utama SHMS Worker"
+SET "DISPLAY_NAME=Utility Worker"
+SET "SERVICE_DESCRIPTION=PT. Baja Titian Utama Utility Worker"
 SET "BAT_DIR=%~dp0"
 SET "APP_DIR=%BAT_DIR:~0,-1%"
 SET "PROJECT_FILE=%APP_DIR%\Worker.csproj"

@@ -2,10 +2,11 @@ import GridShape from "@/components/common/GridShape";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import utilityTheme from "@/components/common/UtilityTheme.module.css";
 
 export default function NotFound() {
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1">
+    <div className={`${utilityTheme.auth} relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1`}>
       <GridShape />
       <div className="mx-auto w-full max-w-[242px] text-center sm:max-w-[472px]">
         <h1 className="mb-8 font-bold text-gray-800 text-title-md dark:text-white/90 xl:text-title-2xl">
@@ -40,7 +41,7 @@ export default function NotFound() {
       </div>
       {/* <!-- Footer --> */}
       <p className="absolute text-sm text-center text-gray-500 -translate-x-1/2 bottom-6 left-1/2 dark:text-gray-400">
-        &copy; {new Date().getFullYear()} - PT. Baja Titian Utama
+        &copy; {new Date().getFullYear()} - Utility Monitoring System
       </p>
     </div>
   );

@@ -2,7 +2,7 @@
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
-import SHMSBrand from "@/components/brand/SHMSBrand";
+import UtilityBrand from "@/components/brand/UtilityBrand";
 import MqttStatus from "@/components/header/MqttStatus";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -78,7 +78,7 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link href="/" className="lg:hidden">
-            <SHMSBrand compact showTitle={false} />
+            <UtilityBrand compact showTitle={false} />
           </Link>
 
           <button

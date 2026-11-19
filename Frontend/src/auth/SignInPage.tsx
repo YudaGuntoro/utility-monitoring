@@ -7,6 +7,8 @@ import { apiPost } from "@/lib/api";
 import { hasValidAuthSession, saveAuthSession } from "@/lib/auth";
 import type { LoginResponse } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
+import utilityTheme from "@/components/common/UtilityTheme.module.css";
+import UtilityMark from "@/components/brand/UtilityMark";
 
 function safeNextPath(value: string | null) {
   return value?.startsWith("/") && !value.startsWith("//") && !value.startsWith("/signin") ? value : "/";
@@ -61,37 +63,30 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-8 text-white sm:px-6">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 scale-[1.01] bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/images/auth/utility-login-background.png')" }}
-      />
-      <div className="absolute inset-0 bg-[#07121d]/42" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(51,131,202,0.08),transparent_55%),linear-gradient(180deg,rgba(7,18,29,0.18),rgba(7,18,29,0.62))]" />
-
+    <div className={`${utilityTheme.auth} relative flex min-h-screen w-full items-center justify-center px-4 py-8 sm:px-6`}>
       <div className="relative z-10 w-full max-w-[500px]">
-        <div className="rounded-lg border border-white/18 bg-[#172231]/84 px-8 py-10 shadow-[0_28px_80px_rgba(0,0,0,0.36)] backdrop-blur-[6px] sm:px-8">
+        <div className={`${utilityTheme.authCard} px-6 py-8 sm:px-8 sm:py-10`}>
           <div className="mb-8 text-center">
-            <h1 className="text-[15px] font-extrabold leading-tight text-white whitespace-nowrap sm:text-[20px] md:text-[22px]">
-              Energy Monitoring System
+            <UtilityMark className="mx-auto mb-5 h-14 w-14 object-contain" />
+            <h1 className="text-xl font-semibold leading-tight text-slate-900 sm:text-[22px]">
+              Utility Monitoring System
             </h1>
-            <p className="mt-2 text-sm font-medium text-[#9db8d2]">Electrical utility telemetry dashboard</p>
-            <p className="mt-3 text-sm text-[#b8c7d8]">Monitor panel energy, devices, and live power data</p>
+            <p className="mt-2 text-sm text-slate-500">Electricity, water, and compressed air</p>
+            <p className="mt-5 rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-[#1d4f8f]">Sign in to monitor your utilities</p>
           </div>
 
           <form autoComplete="off" data-form-type="other" onSubmit={(event) => void submit(event)}>
             <div className="space-y-5">
               <div>
-                <label className="mb-2 block text-xs font-extrabold uppercase text-white" htmlFor={`production-user-${usernameFieldId}`}>
+                <label className="mb-2 block text-xs font-semibold uppercase text-slate-600" htmlFor={`production-user-${usernameFieldId}`}>
                   Username
                 </label>
                 <div className="relative">
-                  <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-[#9db0c3]" />
+                  <UserIcon className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-slate-400" />
                   <input
                     autoCapitalize="none"
                     autoComplete="new-password"
-                    className="h-12 w-full rounded-md border border-transparent bg-[#293440] px-11 text-sm font-medium text-white outline-none transition placeholder:text-[#a9bbcc] focus:border-[#2b74ff] focus:bg-[#2b3643] focus:ring-3 focus:ring-[#2b74ff]/18"
+                    className="h-12 w-full rounded-md border border-slate-300 bg-white px-11 text-sm font-medium text-slate-700 outline-none transition placeholder:text-[#a9bbcc] focus:border-[#2b74ff] focus:bg-white focus:ring-3 focus:ring-[#2b74ff]/18"
                     data-1p-ignore="true"
                     data-form-type="other"
                     data-login-field="true"
@@ -112,14 +107,14 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-extrabold uppercase text-white" htmlFor={`production-secret-${passwordFieldId}`}>
+                <label className="mb-2 block text-xs font-semibold uppercase text-slate-600" htmlFor={`production-secret-${passwordFieldId}`}>
                   Password
                 </label>
                 <div className="relative">
-                  <LockIcon className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-[#9db0c3]" />
+                  <LockIcon className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-slate-400" />
                   <input
                     autoComplete="new-password"
-                    className="h-12 w-full rounded-md border border-transparent bg-[#293440] px-11 pr-12 text-sm font-medium text-white outline-none transition placeholder:text-[#a9bbcc] focus:border-[#2b74ff] focus:bg-[#2b3643] focus:ring-3 focus:ring-[#2b74ff]/18"
+                    className="h-12 w-full rounded-md border border-slate-300 bg-white px-11 pr-12 text-sm font-medium text-slate-700 outline-none transition placeholder:text-[#a9bbcc] focus:border-[#2b74ff] focus:bg-white focus:ring-3 focus:ring-[#2b74ff]/18"
                     data-1p-ignore="true"
                     data-form-type="other"
                     data-login-field="true"
@@ -136,7 +131,7 @@ export default function SignInPage() {
                   />
                   <button
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-4 top-1/2 z-30 -translate-y-1/2 cursor-pointer text-[#9db0c3] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="absolute right-4 top-1/2 z-30 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={loading}
                     onClick={() => setShowPassword((current) => !current)}
                     type="button"
@@ -150,7 +145,7 @@ export default function SignInPage() {
                 </div>
               </div>
 
-              <label className="flex w-fit items-center gap-2 text-sm text-[#c4d2e2]">
+              <label className="flex w-fit items-center gap-2 text-sm text-slate-600">
                 <input
                   className="size-3.5 rounded border-white/40 bg-white text-[#2468ff] focus:ring-[#2468ff]"
                   disabled={loading}
@@ -160,7 +155,7 @@ export default function SignInPage() {
               </label>
 
               <button
-                className="inline-flex h-12 w-full items-center justify-center rounded-md bg-[#2468ff] px-4 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(36,104,255,0.34)] transition-colors hover:bg-[#1858e8] focus:outline-none focus:ring-3 focus:ring-[#2468ff]/28 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-[#2879e7] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1d64c4] focus:outline-none focus:ring-3 focus:ring-[#2879e7]/20 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={loading}
                 type="submit"
               >
@@ -170,8 +165,8 @@ export default function SignInPage() {
           </form>
         </div>
 
-        <p className="mt-7 text-center text-[11px] font-medium text-[#89a1b8]/80">
-          Copyright 2026 Energy Monitoring System. All rights reserved.
+        <p className="mt-7 text-center text-[11px] font-medium text-slate-500">
+          Copyright 2026 Utility Monitoring System. All rights reserved.
         </p>
       </div>
     </div>

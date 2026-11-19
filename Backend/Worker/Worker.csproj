@@ -6,7 +6,7 @@
     <RootNamespace>Worker</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-SHMSWorker-20260909</UserSecretsId>
+    <UserSecretsId>dotnet-UtilityWorker-20260909</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +18,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="114.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Web.API.Persistence\Web.API.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>

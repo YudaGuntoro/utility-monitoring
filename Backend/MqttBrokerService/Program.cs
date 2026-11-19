@@ -21,7 +21,7 @@ AppDomain.CurrentDomain.UnhandledException += (_, eventArgs) =>
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = "SHMSMqttBroker";
+    options.ServiceName = "UtilityMqttBroker";
 });
 
 builder.Services.AddHostedService<MqttBrokerWorker>();

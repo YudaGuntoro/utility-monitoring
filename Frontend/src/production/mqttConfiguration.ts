@@ -1,6 +1,6 @@
 import { apiGet, apiRequest } from "@/lib/api";
 
-export type MqttSensorCode = "TILT" | "VW" | "ATRH" | "ACC";
+export type MqttSensorCode = "POWER" | "WATER" | "AIR" | "TILT" | "VW" | "ATRH" | "ACC";
 
 export type MqttSensorTopic = {
   code: MqttSensorCode;
@@ -17,7 +17,7 @@ export type MqttConfiguration = {
   topics: MqttSensorTopic[];
 };
 
-export const MQTT_CONFIGURATION_STORAGE_KEY = "shms-mqtt-configuration";
+export const MQTT_CONFIGURATION_STORAGE_KEY = "utility-mqtt-configuration";
 
 type ApiMqttSensorTopic = {
   code: MqttSensorCode;
@@ -37,12 +37,15 @@ type ApiMqttConfiguration = {
 export const defaultMqttConfiguration: MqttConfiguration = {
   brokerHost: "localhost",
   brokerPort: "1883",
-  clientId: "SHMSClient",
+  clientId: "utilityClient",
   topics: [
-    { code: "TILT", enabled: true, name: "Tilt Sensor", qos: "1", topic: "shms/tilt" },
-    { code: "VW", enabled: true, name: "Vibrating Wire Sensor", qos: "1", topic: "shms/vw" },
-    { code: "ATRH", enabled: true, name: "Air Temperature & RH Sensor", qos: "1", topic: "shms/atrh" },
-    { code: "ACC", enabled: true, name: "Accelerometer Sensor", qos: "1", topic: "shms/acc" },
+    { code: "POWER", enabled: true, name: "Power Monitoring", qos: "1", topic: "utility/power/+/telemetry" },
+    { code: "WATER", enabled: true, name: "Water Monitoring", qos: "1", topic: "utility/water/+/telemetry" },
+    { code: "AIR", enabled: true, name: "Compressed Air", qos: "1", topic: "utility/compressed-air/+/telemetry" },
+    { code: "TILT", enabled: true, name: "Tilt Sensor", qos: "1", topic: "utility/tilt01/raw" },
+    { code: "VW", enabled: true, name: "Vibrating Wire Sensor", qos: "1", topic: "utility/vw01/raw" },
+    { code: "ATRH", enabled: true, name: "Air Temperature & RH Sensor", qos: "1", topic: "utility/atrh01/raw" },
+    { code: "ACC", enabled: true, name: "Accelerometer Sensor", qos: "1", topic: "utility/acc03/raw" },
   ],
 };
 
@@ -82,17 +85,21 @@ function fromApiConfiguration(value: ApiMqttConfiguration): MqttConfiguration {
 
 function toApiConfiguration(configuration: MqttConfiguration): ApiMqttConfiguration {
   return {
-    broker_host: configuration.brokerHost,
-    broker_port: configuration.brokerPort,
-    client_id: configuration.clientId,
+    broker_host: configuration.brokerHost.trim(),
+    broker_port: configuration.brokerPort.trim(),
+    client_id: configuration.clientId.trim(),
     topics: configuration.topics.map((topic) => ({
       code: topic.code,
       enabled: topic.enabled,
       name: topic.name,
       qos: Number(topic.qos),
-      topic: topic.topic,
+      topic: normalizeTopic(topic.topic),
     })),
   };
+}
+
+function normalizeTopic(value: string) {
+  return value.trim().replace(/^\/+|\/+$/g, "").split("/").filter(Boolean).join("/");
 }
 
 export function readMqttConfiguration(): MqttConfiguration {
@@ -114,7 +121,7 @@ export function saveMqttConfiguration(configuration: MqttConfiguration) {
 
 export async function fetchMqttConfiguration() {
   try {
-    const configuration = fromApiConfiguration(await apiGet<ApiMqttConfiguration>("/api/shms-system/mqtt-configuration"));
+    const configuration = fromApiConfiguration(await apiGet<ApiMqttConfiguration>("/api/utility-system/mqtt-configuration"));
     saveMqttConfiguration(configuration);
     return configuration;
   } catch {
@@ -123,7 +130,7 @@ export async function fetchMqttConfiguration() {
 }
 
 export async function updateMqttConfiguration(configuration: MqttConfiguration) {
-  const updated = fromApiConfiguration(await apiRequest<ApiMqttConfiguration>("/api/shms-system/mqtt-configuration", {
+  const updated = fromApiConfiguration(await apiRequest<ApiMqttConfiguration>("/api/utility-system/mqtt-configuration", {
     body: JSON.stringify(toApiConfiguration(configuration)),
     method: "PUT",
   }));

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import SHMSBrand from "@/components/brand/SHMSBrand";
+import UtilityBrand from "@/components/brand/UtilityBrand";
 import { useSidebar } from "../context/SidebarContext";
 import {
   ChevronDownIcon,
@@ -138,9 +138,9 @@ const AppSidebar: React.FC = () => {
         <Link href="/" className="sidebar-brand-link flex items-center gap-3">
           <span className="sidebar-brand-motion flex items-center gap-4">
             {isExpanded || isHovered || isMobileOpen ? (
-              <SHMSBrand compact />
+              <UtilityBrand compact />
             ) : (
-              <SHMSBrand compact showTitle={false} />
+              <UtilityBrand compact showTitle={false} />
             )}
           </span>
         </Link>

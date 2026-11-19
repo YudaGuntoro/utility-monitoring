@@ -1,20 +1,38 @@
 "use client";
 
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { ConfirmModal } from "@/components/ui/modal/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
-import { CheckLineIcon, PaperPlaneIcon } from "@/icons";
+import { CheckLineIcon, PaperPlaneIcon, TrashBinIcon } from "@/icons";
 import { apiGet } from "@/lib/api";
-import { fetchSystemSettings, readSystemSettings, updateSystemSettings, type SystemSettings, type TimezoneOption } from "./settings";
+import LicenseSettings from "./LicenseSettings";
+import {
+  fetchMqttConfiguration,
+  readMqttConfiguration,
+  updateMqttConfiguration,
+  type MqttConfiguration,
+  type MqttSensorCode,
+  type MqttSensorTopic,
+} from "./mqttConfiguration";
+import {
+  DEFAULT_BRAND_LOGO_SRC,
+  fetchSystemSettings,
+  normalizeBrandLogoUrl,
+  readSystemSettings,
+  updateSystemSettings,
+  type SystemSettings,
+  type TimezoneOption,
+} from "./settings";
 
 const inputClass = "mt-2 h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-3 focus:ring-brand-500/20";
+const tableInputClass = "h-11 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-3 focus:ring-brand-500/20";
 const labelClass = "text-xs font-bold uppercase text-slate-600";
 const cardClass = "overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm";
 
 type HealthState = "online" | "offline" | "unknown";
 
-type SHMSStatus = {
+type UtilityStatus = {
   last_mqtt_at?: string | null;
 };
 
@@ -23,6 +41,16 @@ type MqttBrokerStatus = {
   host?: string;
   online: boolean;
   port?: number;
+};
+
+const sensorDescriptions: Record<MqttSensorCode, string> = {
+  POWER: "Power meter telemetry: voltage, current, power, and energy.",
+  WATER: "Water meter flow, cumulative volume, and pressure.",
+  AIR: "Compressed air flow, pressure, temperature, and compressor power.",
+  ACC: "Acceleration raw data.",
+  ATRH: "Air temperature and relative humidity raw data.",
+  TILT: "Tilt raw data.",
+  VW: "Vibrating wire raw data.",
 };
 
 function numericValue(value: string, fallback: number) {
@@ -100,12 +128,18 @@ function StatusCard({ label, note, status }: { label: string; note: string; stat
 export default function SettingPage() {
   const toast = useToast();
   const [settings, setSettings] = useState<SystemSettings>(() => readSystemSettings());
+  const [mqttConfiguration, setMqttConfiguration] = useState<MqttConfiguration>(() => readMqttConfiguration());
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testingEndpoint, setTestingEndpoint] = useState(false);
   const [brokerStatus, setBrokerStatus] = useState<HealthState>("unknown");
   const [backendStatus, setBackendStatus] = useState<HealthState>("unknown");
   const [lastMqttAt, setLastMqttAt] = useState<string | null>(null);
+  const [logoFileName, setLogoFileName] = useState("");
+  const logoPreviewSrc = useMemo(
+    () => normalizeBrandLogoUrl(settings.brandLogoUrl) || settings.brandLogoDataUrl || DEFAULT_BRAND_LOGO_SRC,
+    [settings.brandLogoDataUrl, settings.brandLogoUrl],
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -115,10 +149,16 @@ export default function SettingPage() {
       }
     });
 
+    void fetchMqttConfiguration().then((result) => {
+      if (!ignore) {
+        setMqttConfiguration(result);
+      }
+    });
+
     async function loadSystemInfo() {
       const [statusResult, brokerResult] = await Promise.allSettled([
-        apiGet<SHMSStatus>("/api/shms-system/status"),
-        apiGet<MqttBrokerStatus>("/api/shms-system/mqtt-broker/status"),
+        apiGet<UtilityStatus>("/api/utility-system/status"),
+        apiGet<MqttBrokerStatus>("/api/utility-system/mqtt-broker/status"),
       ]);
 
       if (ignore) {
@@ -141,15 +181,58 @@ export default function SettingPage() {
     setSettings((current) => ({ ...current, ...patch }));
   }
 
+  function handleLogoFile(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error({ message: "Please select an image file." });
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error({ message: "Logo image must be 1 MB or smaller." });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      patchSettings({ brandLogoDataUrl: String(reader.result ?? ""), brandLogoUrl: "" });
+      setLogoFileName(file.name);
+    };
+    reader.onerror = () => toast.error({ message: "Failed to read the image. Please try again." });
+    reader.readAsDataURL(file);
+  }
+
+  function updateMqttTopic(code: MqttSensorCode, patch: Partial<MqttSensorTopic>) {
+    setMqttConfiguration((current) => ({
+      ...current,
+      topics: current.topics.map((topic) => (topic.code === code ? { ...topic, ...patch } : topic)),
+    }));
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const emptyTopic = mqttConfiguration.topics.find((topic) => topic.enabled && !topic.topic.trim());
+    if (emptyTopic) {
+      toast.error({ message: `MQTT topic for ${emptyTopic.code} is required.` });
+      return;
+    }
+
     setIsConfirmOpen(true);
   }
 
   async function confirmSave() {
     setSaving(true);
     try {
-      setSettings(await updateSystemSettings(settings));
+      setSettings(await updateSystemSettings({
+        ...settings,
+        brandLogoUrl: "",
+      }));
+      setMqttConfiguration(await updateMqttConfiguration({
+        ...mqttConfiguration,
+        topics: mqttConfiguration.topics.map((topic) => ({
+          ...topic,
+          topic: topic.topic.trim(),
+        })),
+      }));
       setIsConfirmOpen(false);
       toast.success({ message: "Settings saved." });
     } catch (err) {
@@ -182,9 +265,65 @@ export default function SettingPage() {
   return (
     <>
       <div className="content-light-surface space-y-7 text-slate-900">
-        <PageBreadcrumb pageTitle="Setting" />
+        <PageBreadcrumb pageTitle="Settings" />
 
-        <form className="mx-4 space-y-6" onSubmit={submit}>
+        <form className="space-y-6" onSubmit={submit}>
+          <SettingSection eyebrow="License" title="Device License">
+            <LicenseSettings />
+          </SettingSection>
+          <SettingSection eyebrow="Branding" title="Application Logo">
+            <div className="grid gap-6 px-5 py-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900">Sidebar and browser icon</p>
+                <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
+                  Choose an image to personalize your sidebar and browser tab.
+                </p>
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-bold text-white transition hover:bg-brand-700 focus-within:ring-3 focus-within:ring-brand-500/30">
+                    <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                    </svg>
+                    Choose image
+                    <input
+                      className="sr-only"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={(event) => { handleLogoFile(event.target.files?.[0]); event.target.value = ""; }}
+                      type="file"
+                    />
+                  </label>
+                  <button
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                    onClick={() => { patchSettings({ brandLogoDataUrl: "", brandLogoUrl: "" }); setLogoFileName(""); }}
+                    type="button"
+                  >
+                    <TrashBinIcon className="size-4" />
+                    Use Default
+                  </button>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-500">PNG, JPG, WebP or GIF · Maximum 1 MB</p>
+                {logoFileName ? <p className="mt-1 truncate text-xs font-semibold text-slate-600">Selected: {logoFileName}</p> : null}
+                <p className="mt-1 text-xs text-slate-500">Save settings to apply your changes.</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Preview</p>
+                <div className="mt-3 flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-slate-50 p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt="Utility Monitoring System logo preview"
+                    className="max-h-full max-w-full object-contain"
+                    src={logoPreviewSrc}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-extrabold text-slate-900">Utility Monitoring</p>
+                  <p className="text-xs font-semibold text-slate-500">System</p>
+                </div>
+                </div>
+              </div>
+            </div>
+          </SettingSection>
+
           <SettingSection eyebrow="General" title="System Preferences">
             <div className="grid gap-5 px-5 py-6 sm:grid-cols-2 xl:grid-cols-4">
               <label className={labelClass}>
@@ -205,6 +344,73 @@ export default function SettingPage() {
                   value={settings.sensorOfflineSeconds}
                 />
               </label>
+            </div>
+          </SettingSection>
+
+          <SettingSection eyebrow="MQTT" title="Topic Configuration">
+            <div className="px-5 py-6">
+              <div className="overflow-x-auto">
+                <table className="leak-rounded-header-table w-full min-w-[820px] border-separate border-spacing-0 text-left text-sm">
+                  <thead className="bg-transparent text-xs uppercase text-white">
+                    <tr>
+                      <th className="w-28 rounded-l-lg bg-brand-500 px-5 py-3">Sensor</th>
+                      <th className="bg-brand-500 px-4 py-3">Description</th>
+                      <th className="bg-brand-500 px-4 py-3">MQTT Topic</th>
+                      <th className="w-28 bg-brand-500 px-4 py-3">QoS</th>
+                      <th className="w-32 rounded-r-lg bg-brand-500 px-5 py-3 text-center">Active</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mqttConfiguration.topics.map((sensor) => (
+                      <tr key={sensor.code}>
+                        <td className="border-b border-slate-100 px-3 py-4">
+                          <div className="text-base font-black text-slate-900">{sensor.code}</div>
+                          <div className="mt-1 text-xs font-bold text-slate-500">{sensor.name}</div>
+                        </td>
+                        <td className="border-b border-slate-100 px-3 py-4 text-sm font-semibold text-slate-600">
+                          {sensorDescriptions[sensor.code]}
+                        </td>
+                        <td className="border-b border-slate-100 px-3 py-4">
+                          <input
+                            className={tableInputClass}
+                            disabled={!sensor.enabled}
+                            onChange={(event) => updateMqttTopic(sensor.code, { topic: event.target.value })}
+                            placeholder={`utility/${sensor.code.toLowerCase()}01/raw`}
+                            value={sensor.topic}
+                          />
+                        </td>
+                        <td className="border-b border-slate-100 px-3 py-4">
+                          <select
+                            className={tableInputClass}
+                            disabled={!sensor.enabled}
+                            onChange={(event) => updateMqttTopic(sensor.code, { qos: event.target.value as MqttSensorTopic["qos"] })}
+                            value={sensor.qos}
+                          >
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                          </select>
+                        </td>
+                        <td className="border-b border-slate-100 px-3 py-4 text-center">
+                          <button
+                            aria-pressed={sensor.enabled}
+                            className={
+                              sensor.enabled
+                                ? "inline-flex h-10 w-24 items-center justify-center gap-2 rounded-lg bg-emerald-50 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100"
+                                : "inline-flex h-10 w-24 items-center justify-center gap-2 rounded-lg bg-slate-100 text-sm font-bold text-slate-500 transition hover:bg-slate-200"
+                            }
+                            onClick={() => updateMqttTopic(sensor.code, { enabled: !sensor.enabled })}
+                            type="button"
+                          >
+                            {sensor.enabled ? <CheckLineIcon className="size-4" /> : null}
+                            {sensor.enabled ? "On" : "Off"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </SettingSection>
 

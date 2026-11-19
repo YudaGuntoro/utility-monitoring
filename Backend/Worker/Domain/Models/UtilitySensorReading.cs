@@ -1,6 +1,6 @@
 namespace Worker.Domain.Models;
 
-public sealed class ShmsSensorReading
+public sealed class UtilitySensorReading
 {
     public string DeviceCode { get; init; } = string.Empty;
     public string SensorCode { get; init; } = string.Empty;

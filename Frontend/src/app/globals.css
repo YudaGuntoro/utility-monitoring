@@ -198,7 +198,7 @@
 }
 
 @utility menu-item-active {
-  @apply border border-orange-200 bg-orange-50 text-orange-700 shadow-sm shadow-orange-100/70 dark:border-transparent dark:bg-gradient-to-r dark:from-orange-500 dark:to-orange-600 dark:text-white dark:shadow-lg dark:shadow-orange-950/20;
+  @apply border border-blue-100 bg-blue-50 text-blue-700 shadow-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200;
 }
 
 @utility menu-item-inactive {
@@ -210,7 +210,7 @@
 }
 
 @utility menu-item-icon-active {
-  @apply text-orange-600 dark:text-white;
+  @apply text-blue-400 dark:text-slate-300;
 }
 
 @utility menu-item-icon-inactive {
@@ -911,7 +911,7 @@ span.flatpickr-weekday,
   }
 }
 
-/* Energy Monitoring System global contrast and table header polish */
+/* Utility Monitoring System global contrast and table header polish */
 .app-main-content {
   background-color: #f3f7fc;
 }
@@ -1157,4 +1157,66 @@ table thead td:last-child {
 .dark .flatpickr-calendar :is(.flatpickr-day, .cur-month, .cur-year, span.flatpickr-weekday) {
   color: #334155 !important;
   fill: #334155 !important;
+}
+
+/* Dashboard surfaces and table hierarchy. */
+.energy-soft-dashboard,
+.dark .energy-light-surface.energy-soft-dashboard {
+  background-color: #f5f7fb !important;
+  color: #475467 !important;
+  font-family: var(--font-outfit);
+  -webkit-font-smoothing: antialiased;
+}
+
+.energy-soft-dashboard h2 {
+  color: #172b4d;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.energy-soft-dashboard :is(.text-slate-800, .text-slate-900),
+.dark .energy-soft-dashboard :is(.text-slate-800, .text-slate-900) {
+  color: #344054 !important;
+}
+
+.energy-soft-dashboard :is(.text-slate-400),
+.dark .energy-soft-dashboard :is(.text-slate-400) {
+  color: #8993a3 !important;
+}
+
+.energy-soft-dashboard :is(.text-slate-500, .text-slate-600, .text-slate-700),
+.dark .energy-soft-dashboard :is(.text-slate-500, .text-slate-600, .text-slate-700) {
+  color: #687586 !important;
+}
+
+.energy-soft-dashboard table {
+  border-color: #edf0f3;
+  border-radius: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-soft-dashboard table :is(thead, thead tr, thead th, thead td),
+.energy-soft-dashboard table thead :is(th, td) * {
+  background-color: #1d4f8f !important;
+  color: #ffffff !important;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.energy-soft-dashboard table tbody tr {
+  border-color: #f0f2f5;
+  transition: background-color 150ms;
+}
+
+.energy-soft-dashboard table tbody tr:hover {
+  background-color: #fafbfc;
+}
+
+.energy-soft-dashboard #energy-dashboard-date {
+  border-radius: 12px;
+  border-color: #e5e9ef;
+  box-shadow: none;
+  font-weight: 400;
+  color: #6b7b90;
 }

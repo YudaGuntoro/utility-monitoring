@@ -21,7 +21,7 @@ Server=127.0.0.1;Port=3306;User ID=root;Password=YOUR_PASSWORD;Database=utility-
 Bootstrap:
 
 ```text
-Backend/database/bajatitian-shms.sql
+Backend/database/utility-system.sql
 ```
 
 ## API Modules
@@ -31,7 +31,7 @@ Backend/database/bajatitian-shms.sql
 - `GET|POST /api/power/devices`
 - `GET|PUT|DELETE /api/power/devices/{id}`
 - `GET /api/power/devices/{id}/history`
-- `GET /api/shms-system/mqtt-broker/status`
+- `GET /api/utilities/{kind}/devices`
 
 ## Run
 

@@ -13,7 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<AppRole> Roles => Set<AppRole>();
     public DbSet<MeasurementUnit> MeasurementUnits => Set<MeasurementUnit>();
-    public DbSet<ShmsSite> ShmsSites => Set<ShmsSite>();
+    public DbSet<UtilitySite> UtilitySites => Set<UtilitySite>();
     public DbSet<StructuralAsset> StructuralAssets => Set<StructuralAsset>();
     public DbSet<AssetZone> AssetZones => Set<AssetZone>();
     public DbSet<SensorType> SensorTypes => Set<SensorType>();
@@ -23,6 +23,9 @@ public class AppDbContext : DbContext
     public DbSet<MqttBrokerConfig> MqttBrokerConfigs => Set<MqttBrokerConfig>();
     public DbSet<MqttSensorTopicConfig> MqttSensorTopicConfigs => Set<MqttSensorTopicConfig>();
     public DbSet<PowerDevice> PowerDevices => Set<PowerDevice>();
+    public DbSet<UtilityType> UtilityTypes => Set<UtilityType>();
+    public DbSet<UtilityDevice> UtilityDevices => Set<UtilityDevice>();
+    public DbSet<UtilityReading> UtilityReadings => Set<UtilityReading>();
     public DbSet<PowerLatestTelemetry> PowerLatestTelemetry => Set<PowerLatestTelemetry>();
     public DbSet<PowerTelemetryHistory> PowerTelemetryHistory => Set<PowerTelemetryHistory>();
     public DbSet<AlertRule> AlertRules => Set<AlertRule>();
@@ -34,6 +37,18 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<UtilityType>().HasKey(x => x.Code);
+        modelBuilder.Entity<UtilityDevice>().HasOne<UtilityType>().WithMany().HasForeignKey(x => x.Kind).HasPrincipalKey(x => x.Code).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<UtilityDevice>().HasIndex(x => new { x.Kind, x.DeviceCode }).IsUnique();
+        modelBuilder.Entity<UtilityDevice>().HasMany(x => x.Readings).WithOne().HasForeignKey(x => x.DeviceId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UtilityReading>().HasIndex(x => new { x.DeviceId, x.Timestamp }).IsUnique();
+        foreach (var entityType in new[] { typeof(UtilityDevice), typeof(UtilityReading) })
+        foreach (var property in modelBuilder.Entity(entityType).Metadata.GetProperties())
+            if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
+            {
+                property.SetPrecision(20);
+                property.SetScale(6);
+            }
 
         modelBuilder.Entity<LogBuffer>(entity =>
         {
@@ -149,9 +164,9 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => new { x.UnitCategory, x.UnitSymbol }).IsUnique();
         });
 
-        modelBuilder.Entity<ShmsSite>(entity =>
+        modelBuilder.Entity<UtilitySite>(entity =>
         {
-            entity.ToTable("shms_sites");
+            entity.ToTable("utility_sites");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("id");
             entity.Property(x => x.SiteCode).HasColumnName("site_code").HasMaxLength(50).IsRequired();
@@ -167,8 +182,8 @@ public class AppDbContext : DbContext
             entity.Property(x => x.IsActive).HasColumnName("is_active");
             entity.Property(x => x.CreatedAt).HasColumnName("created_at");
             entity.Property(x => x.UpdatedAt).HasColumnName("updated_at");
-            entity.HasIndex(x => x.SiteCode).IsUnique().HasDatabaseName("uq_shms_sites_site_code");
-            entity.HasIndex(x => new { x.Latitude, x.Longitude }).HasDatabaseName("ix_shms_sites_location");
+            entity.HasIndex(x => x.SiteCode).IsUnique().HasDatabaseName("uq_utility_sites_site_code");
+            entity.HasIndex(x => new { x.Latitude, x.Longitude }).HasDatabaseName("ix_utility_sites_location");
         });
 
         modelBuilder.Entity<StructuralAsset>(entity =>
@@ -188,7 +203,7 @@ public class AppDbContext : DbContext
             entity.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             entity.HasIndex(x => new { x.SiteId, x.AssetCode }).IsUnique().HasDatabaseName("uq_structural_assets_site_asset_code");
             entity.HasIndex(x => x.SiteId).HasDatabaseName("ix_structural_assets_site_id");
-            entity.HasOne<ShmsSite>().WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<UtilitySite>().WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AssetZone>(entity =>
@@ -252,7 +267,7 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.ZoneId).HasDatabaseName("ix_sensor_devices_zone_id");
             entity.HasIndex(x => x.SensorTypeId).HasDatabaseName("ix_sensor_devices_sensor_type_id");
             entity.HasIndex(x => x.Status).HasDatabaseName("ix_sensor_devices_status");
-            entity.HasOne<ShmsSite>().WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<UtilitySite>().WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StructuralAsset>().WithMany().HasForeignKey(x => x.AssetId).OnDelete(DeleteBehavior.SetNull);
             entity.HasOne<AssetZone>().WithMany().HasForeignKey(x => x.ZoneId).OnDelete(DeleteBehavior.SetNull);
             entity.HasOne<SensorType>().WithMany().HasForeignKey(x => x.SensorTypeId).OnDelete(DeleteBehavior.Restrict);
@@ -391,6 +406,8 @@ public class AppDbContext : DbContext
             entity.Property(x => x.BackupSchedule).HasColumnName("backup_schedule").HasMaxLength(20).IsRequired();
             entity.Property(x => x.PlcIpAddress).HasColumnName("plc_ip_address").HasMaxLength(80);
             entity.Property(x => x.ElectricityRatePerKwh).HasColumnName("electricity_rate_per_kwh").HasPrecision(18, 2);
+            entity.Property(x => x.LogoData).HasColumnName("logo_data").HasColumnType("longblob");
+            entity.Property(x => x.LogoMimeType).HasColumnName("logo_mime_type").HasMaxLength(50);
             entity.Property(x => x.CreatedAt).HasColumnName("created_at");
             entity.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             entity.HasOne(x => x.PressureUnit).WithMany().HasForeignKey(x => x.PressureUnitId).OnDelete(DeleteBehavior.Restrict);

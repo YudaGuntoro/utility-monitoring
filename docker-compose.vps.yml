@@ -65,8 +65,8 @@ services:
 
   worker:
     build:
-      context: ./Backend/Worker
-      dockerfile: Dockerfile
+      context: ./Backend
+      dockerfile: Worker/Dockerfile
     image: utility-monitoring-worker:latest
     container_name: utility-monitoring-worker
     restart: unless-stopped

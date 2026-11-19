@@ -13,8 +13,9 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
     private readonly ILogger<MqttMessageRouter> _logger;
     private readonly IMainServerUploader _mainServerUploader;
     private readonly ILogWriterService _logWriterService;
-    private readonly IShmsSensorHandler _sensorHandler;
+    private readonly IUtilitySensorHandler _sensorHandler;
     private readonly IPowerTelemetryWriterService _powerTelemetryWriter;
+    private readonly UtilityTelemetryWriter _utilityTelemetryWriter;
     private readonly IRedisMqttMessageBuffer _redisBuffer;
     private readonly ISyncStatusWriterService _syncStatusWriter;
     private readonly int _maxReprocessBatch;
@@ -25,8 +26,9 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         ILogger<MqttMessageRouter> logger,
         IMainServerUploader mainServerUploader,
         ILogWriterService logWriterService,
-        IShmsSensorHandler sensorHandler,
+        IUtilitySensorHandler sensorHandler,
         IPowerTelemetryWriterService powerTelemetryWriter,
+        UtilityTelemetryWriter utilityTelemetryWriter,
         IRedisMqttMessageBuffer redisBuffer,
         ISyncStatusWriterService syncStatusWriter)
     {
@@ -35,6 +37,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         _logWriterService = logWriterService;
         _sensorHandler = sensorHandler;
         _powerTelemetryWriter = powerTelemetryWriter;
+        _utilityTelemetryWriter = utilityTelemetryWriter;
         _redisBuffer = redisBuffer;
         _syncStatusWriter = syncStatusWriter;
         _maxReprocessBatch = Math.Max(1, Config.Instance.ReadInt("MaxReprocessBatch", "Buffer", 100));
@@ -55,6 +58,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
 
     public async Task HandleAsync(string topic, string payload, CancellationToken cancellationToken = default)
     {
+        if (await _utilityTelemetryWriter.HandleAsync(topic, payload, cancellationToken)) return;
         if (await _powerTelemetryWriter.UpsertAsync(topic, payload, cancellationToken))
         {
             await _logWriterService.WriteRawAsync(topic, payload, "uploaded", cancellationToken: cancellationToken);
@@ -195,7 +199,7 @@ public sealed class MqttMessageRouter : IMqttMessageHandler
         }
         catch (Exception ex) when (ex is FormatException or JsonException)
         {
-            _logger.LogWarning(ex, "[SHMS] MQTT payload was logged but not inserted as sensor reading. Topic={Topic}", topic);
+            _logger.LogWarning(ex, "[Utility] MQTT payload was logged but not inserted as sensor reading. Topic={Topic}", topic);
         }
     }
 

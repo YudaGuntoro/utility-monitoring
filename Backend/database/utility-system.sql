@@ -1,8 +1,8 @@
 -- Utility Monitoring database bootstrap with normalized starter data.
 -- Run from repository root:
--- mysql -u root -p -e "source Backend/database/bajatitian-shms.sql"
+-- mysql -u root -p -e "source Backend/database/utility-system.sql"
 
-SOURCE Backend/database/bajatitian-shms_schema_only.sql;
+SOURCE Backend/database/utility-system_schema.sql;
 
 USE `utility-system`;
 
@@ -52,9 +52,9 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO users
     (id, username, full_name, email, roles_id, is_active, password_hash, password_salt)
 VALUES
-    (1, 'admin', 'SHMS Administrator', 'admin@shms.local', 1, 1,
+    (1, 'admin', 'Utility System Administrator', 'admin@utility.local', 1, 1,
      'mV/QhZOhh7mvmWj0P1RgeXm3hZB1AkKHY5jfEcrC7PE=', 'Y21tcy1hZG1pbi1zYWx0LXYx'),
-    (2, 'root', 'SHMS Root', 'root@shms.local', 1, 1,
+    (2, 'root', 'Utility System Root', 'root@utility.local', 1, 1,
      'QzApLclLs39Wg6pGId5HXwbyiH5QdA41S8X40bj4Mm4=', 'eWFubWFyLXJvb3QtdjEhIQ==')
 ON DUPLICATE KEY UPDATE
     full_name = VALUES(full_name),
@@ -95,7 +95,7 @@ WHERE pressure.unit_category = 'pressure'
 ON DUPLICATE KEY UPDATE
     id = system_settings.id;
 
-INSERT INTO shms_sites
+INSERT INTO utility_sites
     (id, site_code, site_name, owner_name, address_line, city, province, country_code, latitude, longitude, timezone, is_active)
 VALUES
     (1, 'BTU-SITE-001', 'Baja Titian Utama Monitoring Site', 'PT. Baja Titian Utama', 'Bridge monitoring demo area', 'Palangka Raya', 'Kalimantan Tengah', 'ID', -2.2096000, 113.9213000, 'Asia/Jakarta', 1)
@@ -113,7 +113,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO structural_assets
     (id, site_id, asset_code, asset_name, asset_type, design_life_years, commissioned_at, description, is_active)
 VALUES
-    (1, 1, 'BRG-KM-012', 'Bridge KM 12', 'bridge', 50, '2026-01-01', 'Primary bridge asset for SHMS demonstration', 1)
+    (1, 1, 'BRG-KM-012', 'Bridge KM 12', 'bridge', 50, '2026-01-01', 'Primary bridge asset for Utility demonstration', 1)
 ON DUPLICATE KEY UPDATE
     asset_name = VALUES(asset_name),
     asset_type = VALUES(asset_type),
@@ -159,10 +159,10 @@ ON DUPLICATE KEY UPDATE sensor_name = VALUES(sensor_name), description = VALUES(
 INSERT INTO sensor_devices
     (id, site_id, asset_id, zone_id, sensor_type_id, device_code, device_name, serial_number, manufacturer, model_number, installed_at, latitude, longitude, elevation_m, status)
 VALUES
-    (1, 1, 1, 1, 1, 'SHMS-TILT-01', 'Tilt Sensor Pier 1', 'TILT-0001', 'Generic', 'TILT-X1', '2026-09-09 08:00:00', -2.2096000, 113.9213000, 14.250, 'active'),
-    (2, 1, 1, 2, 2, 'SHMS-VW-01', 'Vibrating Wire Pier 2', 'VW-0001', 'Generic', 'VW-X1', '2026-09-09 08:00:00', -2.2098000, 113.9215000, 13.800, 'active'),
-    (3, 1, 1, 3, 3, 'SHMS-ATRH-01', 'Temperature RH Deck', 'ATRH-0001', 'Generic', 'ATRH-X1', '2026-09-09 08:00:00', -2.2097000, 113.9214000, 15.100, 'active'),
-    (4, 1, 1, 3, 4, 'SHMS-ACC-01', 'Accelerometer Deck', 'ACC-0001', 'Generic', 'ACC-X1', '2026-09-09 08:00:00', -2.2097000, 113.9214000, 15.150, 'active')
+    (1, 1, 1, 1, 1, 'Utility-TILT-01', 'Tilt Sensor Pier 1', 'TILT-0001', 'Generic', 'TILT-X1', '2026-09-09 08:00:00', -2.2096000, 113.9213000, 14.250, 'active'),
+    (2, 1, 1, 2, 2, 'Utility-VW-01', 'Vibrating Wire Pier 2', 'VW-0001', 'Generic', 'VW-X1', '2026-09-09 08:00:00', -2.2098000, 113.9215000, 13.800, 'active'),
+    (3, 1, 1, 3, 3, 'Utility-ATRH-01', 'Temperature RH Deck', 'ATRH-0001', 'Generic', 'ATRH-X1', '2026-09-09 08:00:00', -2.2097000, 113.9214000, 15.100, 'active'),
+    (4, 1, 1, 3, 4, 'Utility-ACC-01', 'Accelerometer Deck', 'ACC-0001', 'Generic', 'ACC-X1', '2026-09-09 08:00:00', -2.2097000, 113.9214000, 15.150, 'active')
 ON DUPLICATE KEY UPDATE
     device_name = VALUES(device_name),
     site_id = VALUES(site_id),
@@ -199,7 +199,7 @@ ON DUPLICATE KEY UPDATE channel_name = VALUES(channel_name), measurement_name = 
 INSERT INTO mqtt_broker_configs
     (id, config_name, host, port, client_id, use_tls, is_active)
 VALUES
-    (1, 'default', '127.0.0.1', 1883, 'SHMSClient', 0, 1)
+    (1, 'default', '127.0.0.1', 1883, 'UtilityClient', 0, 1)
 ON DUPLICATE KEY UPDATE
     host = VALUES(host),
     port = VALUES(port),
@@ -209,22 +209,22 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO mqtt_sensor_topics
     (sensor_type_id, code, name, topic, qos, enabled)
-SELECT id, 'TILT', 'Tilt Sensor', 'shms/tilt', 1, 1 FROM sensor_types WHERE sensor_code = 'TILT'
+SELECT id, 'TILT', 'Tilt Sensor', 'utility/tilt', 1, 1 FROM sensor_types WHERE sensor_code = 'TILT'
 ON DUPLICATE KEY UPDATE sensor_type_id = VALUES(sensor_type_id), name = VALUES(name), topic = VALUES(topic), qos = VALUES(qos), enabled = VALUES(enabled);
 
 INSERT INTO mqtt_sensor_topics
     (sensor_type_id, code, name, topic, qos, enabled)
-SELECT id, 'VW', 'Vibrating Wire Sensor', 'shms/vw', 1, 1 FROM sensor_types WHERE sensor_code = 'VW'
+SELECT id, 'VW', 'Vibrating Wire Sensor', 'utility/vw', 1, 1 FROM sensor_types WHERE sensor_code = 'VW'
 ON DUPLICATE KEY UPDATE sensor_type_id = VALUES(sensor_type_id), name = VALUES(name), topic = VALUES(topic), qos = VALUES(qos), enabled = VALUES(enabled);
 
 INSERT INTO mqtt_sensor_topics
     (sensor_type_id, code, name, topic, qos, enabled)
-SELECT id, 'ATRH', 'Air Temperature & RH Sensor', 'shms/atrh', 1, 1 FROM sensor_types WHERE sensor_code = 'ATRH'
+SELECT id, 'ATRH', 'Air Temperature & RH Sensor', 'utility/atrh', 1, 1 FROM sensor_types WHERE sensor_code = 'ATRH'
 ON DUPLICATE KEY UPDATE sensor_type_id = VALUES(sensor_type_id), name = VALUES(name), topic = VALUES(topic), qos = VALUES(qos), enabled = VALUES(enabled);
 
 INSERT INTO mqtt_sensor_topics
     (sensor_type_id, code, name, topic, qos, enabled)
-SELECT id, 'ACC', 'Accelerometer Sensor', 'shms/acc', 1, 1 FROM sensor_types WHERE sensor_code = 'ACC'
+SELECT id, 'ACC', 'Accelerometer Sensor', 'utility/acc', 1, 1 FROM sensor_types WHERE sensor_code = 'ACC'
 ON DUPLICATE KEY UPDATE sensor_type_id = VALUES(sensor_type_id), name = VALUES(name), topic = VALUES(topic), qos = VALUES(qos), enabled = VALUES(enabled);
 
 INSERT INTO sensor_readings
@@ -253,10 +253,10 @@ SELECT
     seed.uploaded_at,
     seed.created_at
 FROM (
-    SELECT 'SHMS-TILT-01' device_id, 'shms/tilt' topic, '{"sensor":"TILT","value":0.14,"unit":"deg"}' payload, '2026-09-09 08:00:00.000000' time_stamp, 'uploaded' status, 0 retry_count, '2026-09-09 08:00:05.000000' uploaded_at, '2026-09-09 08:00:00.000000' created_at
-    UNION ALL SELECT 'SHMS-VW-01', 'shms/vw', '{"sensor":"VW","value":1284.5,"unit":"Hz"}', '2026-09-09 08:00:00.000000', 'uploaded', 0, '2026-09-09 08:00:05.000000', '2026-09-09 08:00:00.000000'
-    UNION ALL SELECT 'SHMS-ATRH-01', 'shms/atrh', '{"sensor":"ATRH","temperature":31.2,"humidity":68.5}', '2026-09-09 08:00:00.000000', 'pending', 1, NULL, '2026-09-09 08:00:00.000000'
-    UNION ALL SELECT 'SHMS-ACC-01', 'shms/acc', '{"sensor":"ACC","x":0.01,"y":0.03,"z":1.02}', '2026-09-09 08:00:00.000000', 'failed', 3, NULL, '2026-09-09 08:00:00.000000'
+    SELECT 'Utility-TILT-01' device_id, 'utility/tilt' topic, '{"sensor":"TILT","value":0.14,"unit":"deg"}' payload, '2026-09-09 08:00:00.000000' time_stamp, 'uploaded' status, 0 retry_count, '2026-09-09 08:00:05.000000' uploaded_at, '2026-09-09 08:00:00.000000' created_at
+    UNION ALL SELECT 'Utility-VW-01', 'utility/vw', '{"sensor":"VW","value":1284.5,"unit":"Hz"}', '2026-09-09 08:00:00.000000', 'uploaded', 0, '2026-09-09 08:00:05.000000', '2026-09-09 08:00:00.000000'
+    UNION ALL SELECT 'Utility-ATRH-01', 'utility/atrh', '{"sensor":"ATRH","temperature":31.2,"humidity":68.5}', '2026-09-09 08:00:00.000000', 'pending', 1, NULL, '2026-09-09 08:00:00.000000'
+    UNION ALL SELECT 'Utility-ACC-01', 'utility/acc', '{"sensor":"ACC","x":0.01,"y":0.03,"z":1.02}', '2026-09-09 08:00:00.000000', 'failed', 3, NULL, '2026-09-09 08:00:00.000000'
 ) seed
 LEFT JOIN sensor_devices devices ON devices.device_code = seed.device_id
 WHERE NOT EXISTS (
